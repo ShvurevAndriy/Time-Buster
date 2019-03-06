@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 
 public static class JumpPhysics {
+    public const float g = 9.8f;
+
     public static Vector2 CalculateNextJumpVelocities(float heightToJump, float g, float angel) {
         float velocity = HeightToJumpForce(heightToJump, g, angel);
         return new Vector2(velocity * Mathf.Cos(angel * Mathf.Deg2Rad), velocity * Mathf.Sin(angel * Mathf.Deg2Rad));

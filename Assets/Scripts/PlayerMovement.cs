@@ -1,24 +1,35 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour {
-    private const float g = 9.8f;
 
-    [Range(20, 200)] public float radius = 35f;
+    enum VelocityBehaviorType {
+        regular,
+        jetpack,
+        paratroop
+    }
+
     [Range(45, 89)] public float jumpAngel = 77f;
     public float minJumpHeight = 5f;
     public float maxJumpHeight = 50f;
     public float gravityScale = 4;
     public float forceJumpTimeScale = 3;
+    public float radius = 40;
+    public float currentAngel = 0;
+    public float paratrooperVelocity = -2f;
+    public float jetThrust = 10f;
 
     private Rigidbody rigidBody;
     private BoxCollider bottomCollider;
     private MyGameManager gameManager;
+    private float yVelocity = 0;
 
-    public float CurrentAngel { get; set; } = 0;
+    private Dictionary<VelocityBehaviorType, VelocityBehavior> velocityBehaviors;
+
     public float StartBoostYPos { get; set; }
     public float ApexYPos { get; set; }
     public float CurrentJumpHeight { get; set; }
-    public float YVelocity { get; set; } = 0;
+    public float YVelocity { get => yVelocity; set => yVelocity = value; }
     public float TimeScale { get; set; } = 1;
     public float AngularSpeed { get; set; }
 
@@ -28,25 +39,28 @@ public class PlayerMovement : MonoBehaviour {
     public event PlayerOnJumpAction OnPlayerForeJump = delegate { };
 
     void Start() {
+        velocityBehaviors = new Dictionary<VelocityBehaviorType, VelocityBehavior> {
+            { VelocityBehaviorType.regular, new RegularMovementBehavior(this)},
+            { VelocityBehaviorType.jetpack, new RegularMovementBehavior(this)},
+            { VelocityBehaviorType.paratroop, new RegularMovementBehavior(this)}
+        };
+
         gameManager = FindObjectOfType<MyGameManager>();
         rigidBody = GetComponent<Rigidbody>();
         bottomCollider = GetComponent<BoxCollider>();
-        transform.position = new Vector3(Mathf.Cos(Mathf.Deg2Rad * CurrentAngel) * radius, transform.position.y, Mathf.Sin(Mathf.Deg2Rad * CurrentAngel) * radius);
     }
 
     void FixedUpdate() {
-        
         if (gameManager.CurrentGameMode != GameMode.play) {
-            transform.rotation = Quaternion.Euler(0, 90 - CurrentAngel, 0);
+            transform.rotation = Quaternion.Euler(0, 90 - currentAngel, 0);
             return;
         }
+        rigidBody.velocity = velocityBehaviors[VelocityBehaviorType.regular].GetVelocity(ref yVelocity);
+        SetAppropriateRotation();
+    }
 
-        CurrentAngel += AngularSpeed * TimeScale;
-        transform.rotation = Quaternion.Euler(0, 90 - CurrentAngel, 0);
-        Vector3 nextPositions = JumpPhysics.CalculatePositionAtTime(YVelocity, CurrentAngel, radius, Time.deltaTime * TimeScale, g * gravityScale, transform.position);
-        Vector3 horizontalVelocities = (nextPositions - transform.position) / Time.deltaTime;
-        YVelocity = YVelocity - g * gravityScale * Time.deltaTime;
-        rigidBody.velocity = horizontalVelocities;
+    public void SetAppropriateRotation() {
+        transform.rotation = Quaternion.Euler(0, 90 - currentAngel, 0);
     }
 
     public void DoJump() {
@@ -57,9 +71,9 @@ public class PlayerMovement : MonoBehaviour {
         }
 
         float CurrentJumpHeight = JumpPhysics.CalculateNextJumpHeight(forceHeight, minJumpHeight, maxJumpHeight);
-        Vector2 velocities = JumpPhysics.CalculateNextJumpVelocities(CurrentJumpHeight, g * gravityScale, jumpAngel);
+        Vector2 velocities = JumpPhysics.CalculateNextJumpVelocities(CurrentJumpHeight, JumpPhysics.g * gravityScale, jumpAngel);
         YVelocity = velocities.y;
-        AngularSpeed = velocities.x / radius;
+        AngularSpeed = velocities.x * Mathf.Rad2Deg / radius;
         ApexYPos = CurrentJumpHeight + transform.position.y;
         StartBoostYPos = float.NegativeInfinity;
         OnPlayerJump();
@@ -94,6 +108,73 @@ public class PlayerMovement : MonoBehaviour {
             gameManager.StartPlaybackMode();
         } else {
             DoJump();
+        }
+    }
+
+    public interface VelocityBehavior {
+        Vector3 GetVelocity(ref float yVelocity);
+    }
+
+    public class ParachuteMovementBehavior : VelocityBehavior {
+
+        private PlayerMovement playerMovement;
+
+        public ParachuteMovementBehavior(PlayerMovement playerMovement) {
+            this.playerMovement = playerMovement;
+        }
+
+        public Vector3 GetVelocity(ref float yVelocity) {
+            playerMovement.currentAngel += playerMovement.AngularSpeed * playerMovement.TimeScale;
+            Vector3 nextPositions = JumpPhysics.CalculatePositionAtTime(yVelocity,
+                playerMovement.currentAngel,
+                playerMovement.radius,
+                Time.deltaTime * playerMovement.TimeScale,
+                JumpPhysics.g * playerMovement.gravityScale,
+                playerMovement.transform.position);
+            yVelocity = yVelocity + playerMovement.jetThrust * Time.deltaTime;
+            return (nextPositions - playerMovement.transform.position) / Time.deltaTime;
+        }
+    }
+
+
+    public class JetPackMovementBehavior : VelocityBehavior {
+
+        private PlayerMovement playerMovement;
+
+        public JetPackMovementBehavior(PlayerMovement playerMovement) {
+            this.playerMovement = playerMovement;
+        }
+
+        public Vector3 GetVelocity(ref float yVelocity) {
+            playerMovement.currentAngel += playerMovement.AngularSpeed * playerMovement.TimeScale;
+            Vector3 nextPositions = JumpPhysics.CalculatePositionAtTime(yVelocity,
+                playerMovement.currentAngel,
+                playerMovement.radius,
+                Time.deltaTime * playerMovement.TimeScale,
+                JumpPhysics.g * playerMovement.gravityScale,
+                playerMovement.transform.position);
+            yVelocity = yVelocity + playerMovement.jetThrust * Time.deltaTime;
+            return (nextPositions - playerMovement.transform.position) / Time.deltaTime;
+        }
+    }
+
+    public class RegularMovementBehavior : VelocityBehavior {
+        private PlayerMovement playerMovement;
+
+        public RegularMovementBehavior(PlayerMovement playerMovement) {
+            this.playerMovement = playerMovement;
+        }
+
+        public Vector3 GetVelocity(ref float yVelocity) {
+            playerMovement.currentAngel += playerMovement.AngularSpeed * playerMovement.TimeScale * Time.deltaTime;
+            Vector3 nextPositions = JumpPhysics.CalculatePositionAtTime(yVelocity,
+                playerMovement.currentAngel,
+                playerMovement.radius,
+                Time.deltaTime * playerMovement.TimeScale,
+                JumpPhysics.g * playerMovement.gravityScale,
+                playerMovement.transform.position);
+            yVelocity = yVelocity - JumpPhysics.g * playerMovement.gravityScale * Time.deltaTime;
+            return (nextPositions - playerMovement.transform.position) / Time.deltaTime;
         }
     }
 }

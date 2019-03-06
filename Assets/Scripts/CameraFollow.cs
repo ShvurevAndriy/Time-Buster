@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
 
 public class CameraFollow : MonoBehaviour {
-    [SerializeField] bool lookAtPlayer;
-    [SerializeField] bool followPlayerByY;
-    [Range(-20, 60)] [SerializeField] float yOffset;
-    [Range(-20, 60)] [SerializeField] float yTargetOffset;
-    [SerializeField] float radius = 20;
+    [SerializeField] bool lookAtPlayer = true;
+    [SerializeField] bool followPlayerByY = false;
+    [Range(-20, 60)] [SerializeField] float yOffset = 0;
+    [Range(-20, 60)] [SerializeField] float yTargetOffset = 0;
+    [SerializeField] float distanceToTarget = 20;
     [SerializeField] float coeff = 0.5f;
 
     [SerializeField] float increaseZoomTimeEasing = 2;
@@ -31,6 +31,7 @@ public class CameraFollow : MonoBehaviour {
     private float startIncreaseingTime;
     private float lastChangedSize;
     private float startDecreasingTime;
+    private float radius;
 
 
     public float CameraSize { get; set; }
@@ -49,10 +50,12 @@ public class CameraFollow : MonoBehaviour {
     }
 
     void LateUpdate() {
+
+        radius = player.radius + distanceToTarget;
         transform.position = new Vector3(
-            Mathf.Cos(Mathf.Deg2Rad * player.CurrentAngel) * (radius + CameraSize),
+            Mathf.Cos(Mathf.Deg2Rad * player.currentAngel) * (radius + CameraSize),
             yOffset,
-            Mathf.Sin(Mathf.Deg2Rad * player.CurrentAngel) * (radius + CameraSize));
+            Mathf.Sin(Mathf.Deg2Rad * player.currentAngel) * (radius + CameraSize));
 
         Vector3 lookAt;
         if (lookAtPlayer) {

@@ -28,7 +28,7 @@ public class MarkersPool : MonoBehaviour {
         }
         objectFromPool.transform.localScale = new Vector3(scale, scale, scale);
         objectFromPool.transform.position = pos;
-        objectFromPool.GetComponent<MeshRenderer>().material.color = color;
+        objectFromPool.SetColor(color);
         objectFromPool.gameObject.SetActive(true);
         if (timeToLife > 0) {
             objectFromPool.DestroyAfterSeconds(timeToLife);
