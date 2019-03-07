@@ -66,6 +66,8 @@ public class PlayerMovement : MonoBehaviour {
         float time = Time.deltaTime * TimeScale;
         float gravity = gravityScale * JumpPhysics.g;
 
+        currentAngel += AngularSpeed * time;
+
         Vector3 nextPosition = JumpPhysics.CalculatePositionAtTime(
             yVelocity,
             currentAngel,
@@ -73,8 +75,6 @@ public class PlayerMovement : MonoBehaviour {
             time,
             gravity,
             transform.position);
-
-        currentAngel += AngularSpeed * time;
 
         switch (playerStateController.CurrentJumpState) {
             case JumpState.jetpack:
@@ -97,7 +97,6 @@ public class PlayerMovement : MonoBehaviour {
         if (IsInLayerMask(collision.gameObject.layer, LayerMask.GetMask("Hazard"))) {
             gameManager.StartPlaybackMode();
         } else {
-
             foreach (ContactPoint contact in collision.contacts) {
                 switch (contact.thisCollider.name) {
                     case "Player":

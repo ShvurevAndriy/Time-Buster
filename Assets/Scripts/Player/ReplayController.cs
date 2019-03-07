@@ -68,7 +68,8 @@ public class ReplayController : MonoBehaviour {
         }
         if (Input.GetMouseButtonDown(0)) {
             mouseStartXPos = Camera.main.ScreenToViewportPoint(Input.mousePosition).x;
-        } else if (Input.GetMouseButton(0)) {
+        }
+        if (Input.GetMouseButton(0)) {
             if (!float.IsInfinity(mouseStartXPos)) {
                 float currentX = Camera.main.ScreenToViewportPoint(Input.mousePosition).x;
                 int frameDiff = Mathf.RoundToInt((currentX - mouseStartXPos) * frameFactor);
@@ -83,6 +84,7 @@ public class ReplayController : MonoBehaviour {
     }
 
     private void OnPlaybackModeOn() {
+        mouseStartXPos = float.NegativeInfinity;
         label.enabled = true;
         rigidBody.detectCollisions = false;
         rigidBody.collisionDetectionMode = CollisionDetectionMode.Discrete;
@@ -104,11 +106,11 @@ public class ReplayController : MonoBehaviour {
         playbackData = new List<ReplayData>(positionRecord);
         DrawPath();
         lastSelected = playbackData.Count-1;
+        currentFrame = lastSelected;
         DoPlayBack(lastSelected);
     }
 
     private void OnPlayModeOn() {
-        mouseStartXPos = 0;
         label.enabled = false;
         rigidBody.detectCollisions = true;
         rigidBody.isKinematic = false;
@@ -175,10 +177,10 @@ public class ReplayController : MonoBehaviour {
         transform.position = currentReplayData.posotion;
         cameraController.CameraSize = currentReplayData.cameraZoom;
         playerMovement.currentAngel = currentReplayData.currentAngel;
-        gameManger.UpdateVisabilityCollectedItems(currentReplayData.currentAngel);
         gameManger.JetPackFuel = currentReplayData.jetpackFuel;
         gameManger.Parachutes = currentReplayData.parachutes;
         gameManger.Planners = currentReplayData.planners;
+        gameManger.ActualizeGameDataForPlayback(currentReplayData.currentAngel);
     }
 
     private void PreparePlayMode() {

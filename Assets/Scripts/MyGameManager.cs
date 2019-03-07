@@ -111,7 +111,7 @@ public class MyGameManager : MonoBehaviour {
         scoreText.text = Scores.ToString();
     }
 
-    public void UpdateVisabilityCollectedItems(float angel) {
+    public void ActualizeGameDataForPlayback(float angel) {
         collectedCoins.ForEach(i => {
             if (i.revertOnPlayback) {
                 if (i.AngelWhenCollected > angel) {
