@@ -1,19 +1,18 @@
 ﻿using UnityEngine;
-public class CoinsItem : CollectedItem {
+public class PlannerItem : CollectedItem {
 
-    [SerializeField] int coinsAmount = 100;
+    [SerializeField] int plannerAmount = 1;
     [SerializeField] Material playback = null;
     [SerializeField] Material normal = null;
 
-    public CoinsItem() : base(true) {
+    public PlannerItem() : base(true) {
     }
 
     protected override void ActivateItem() {
-        myGameManager.ChangeScore(coinsAmount);
+        myGameManager.ChangeParachutes(plannerAmount);
     }
 
     protected override void DeactivateItem() {
-        myGameManager.ChangeScore(-coinsAmount);
     }
 
     protected override void VisualizeOnPlayback() {

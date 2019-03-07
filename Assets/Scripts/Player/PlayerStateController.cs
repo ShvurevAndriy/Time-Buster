@@ -5,20 +5,24 @@ public enum JumpState {
     slowDown = 1,
     apex = 2,
     flyDown = 3,
-    force = 4
+    force = 4,
+    jetpack = 5,
+    patachute = 6,
+    deltaplan = 7
 }
 
 public class PlayerStateController : MonoBehaviour {
 
-    public float minVelocityForSlowDown;
+    public float minVelocityForSlowDown = 7;
+
     private MyGameManager gameManager;
     private PlayerMovement playerMovement;
+    private JetpackConfiguration jetpackConfiguration;
     private Animator animator;
 
-    private bool wasClickAfterPlayback;
     private bool forceTrigger;
 
-    public JumpState CurrentJumpState { get;  set; }
+    public JumpState CurrentJumpState { get; set; }
 
     void Start() {
         gameManager = FindObjectOfType<MyGameManager>();
@@ -26,6 +30,8 @@ public class PlayerStateController : MonoBehaviour {
         gameManager.OnPlayModeOn += OnPlayModeOn;
 
         animator = GetComponent<Animator>();
+        jetpackConfiguration = FindObjectOfType<JetpackConfiguration>();
+
         playerMovement = GetComponent<PlayerMovement>();
         playerMovement.OnPlayerJump += OnJump;
 
@@ -50,6 +56,14 @@ public class PlayerStateController : MonoBehaviour {
             case JumpState.flyDown:
                 ProcessUserInput();
                 break;
+            case JumpState.jetpack:
+                if (gameManager.HasFuel()) {
+                    gameManager.ChangeJetpackFuel(-jetpackConfiguration.FuelConsumptionPerSecond * Time.deltaTime);
+                } else {
+                    TurneOffJetpack();
+                }
+                ProcessUserInput();
+                break;
             case JumpState.force:
                 return;
         }
@@ -69,12 +83,29 @@ public class PlayerStateController : MonoBehaviour {
     }
 
     private void ProcessUserInput() {
-        if (Input.GetButtonDown("Jump") && !wasClickAfterPlayback) {
-            wasClickAfterPlayback = true;
-            return;
-        }
-        if (Input.GetButton("Jump") && wasClickAfterPlayback) {
+        if (Input.GetButtonDown("Jump")) {
             SetForceDownJumpTrigger();
+        }
+        ProcessUserJetpackInput();
+    }
+
+    private void ProcessUserJetpackInput() {
+        if (Input.GetButtonDown("Fire1") && gameManager.HasFuel()) {
+            if (!forceTrigger) {
+                animator.SetTrigger("JetPack");
+                ChanegeJumpState(JumpState.jetpack);
+            }
+        } else if (Input.GetButtonUp("Fire1") && CurrentJumpState == JumpState.jetpack) {
+            TurneOffJetpack();
+        }
+    }
+
+    private void TurneOffJetpack() {
+        animator.ResetTrigger("JetPack");
+        if (playerMovement.YVelocity > 0) {
+            ChanegeJumpState(JumpState.flyUp);
+        } else {
+            ChanegeJumpState(JumpState.flyDown);
         }
     }
 
@@ -84,20 +115,23 @@ public class PlayerStateController : MonoBehaviour {
     }
 
     private void OnPlayModeOn() {
-        wasClickAfterPlayback = false;
         animator.ResetTrigger("Play Back");
         ChanegeJumpState(CurrentJumpState);
         if (CurrentJumpState == JumpState.force) {
             animator.SetTrigger("Force Jump");
+        } else if (CurrentJumpState == JumpState.jetpack) {
+            animator.SetTrigger("JetPack");
         }
     }
 
     private void OnJump() {
         forceTrigger = false;
-        ChanegeJumpState(JumpState.flyUp);
         animator.ResetTrigger("Force Jump");
-        animator.ResetTrigger("Immediate force jump");
+        animator.ResetTrigger("JetPack");
+        animator.ResetTrigger("Parachute");
+        animator.ResetTrigger("Deltaplan");
         animator.SetTrigger("New Jump");
+        ChanegeJumpState(JumpState.flyUp);
     }
 
     private void CheckTransitionToApexState() {

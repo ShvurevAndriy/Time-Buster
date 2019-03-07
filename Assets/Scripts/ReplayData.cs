@@ -12,6 +12,9 @@ public class ReplayData {
     public float startBoostYPos;
     public float apexYPos;
     public float cameraZoom;
+    public float jetpackFuel;
+    public int planners;
+    public int parachutes;
 
     public static Builder builder() {
         return new Builder();
@@ -28,6 +31,9 @@ public class ReplayData {
         private float startBoostYPos;
         private float apexYPos;
         private float cameraZoom;
+        private float jetpackFuel;
+        private int planners;
+        private int parachutes;
 
         public Builder setPosition(Vector3 posotion) {
             this.posotion = posotion;
@@ -71,6 +77,21 @@ public class ReplayData {
             return this;
         }
 
+        public Builder setJetpackFuel(float jetpackFuel) {
+            this.jetpackFuel = jetpackFuel;
+            return this;
+        }
+
+        public Builder setParachutes(int parachutes) {
+            this.parachutes = parachutes;
+            return this;
+        }
+
+        public Builder setPlanners(int planners) {
+            this.planners = planners;
+            return this;
+        }
+
         public ReplayData build() {
             ReplayData replayData = new ReplayData();
             replayData.posotion = posotion;
@@ -83,6 +104,9 @@ public class ReplayData {
             replayData.apexYPos = apexYPos;
             replayData.cameraZoom = cameraZoom;
             replayData.currentAngel = currentAngel;
+            replayData.jetpackFuel = jetpackFuel;
+            replayData.parachutes = parachutes;
+            replayData.planners = planners;
             return replayData;
         }
     }

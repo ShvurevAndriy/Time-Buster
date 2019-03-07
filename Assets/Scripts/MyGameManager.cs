@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,29 +12,103 @@ public enum GameMode {
 public class MyGameManager : MonoBehaviour {
 
     [SerializeField] Text scoreText = null;
+    [SerializeField] Text parachutesText = null;
+    [SerializeField] Text plannersText = null;
+    [SerializeField] ProgressBar jetpackFuelBar = null;
+
+    [SerializeField] float jetPackFuel = 0;
+    [SerializeField] int parachutes = 0;
+    [SerializeField] int planners = 0;
 
     public GameMode CurrentGameMode { get; private set; }
+    public float JetPackFuel { get => jetPackFuel; set => jetPackFuel = value; }
+    public int Parachutes { get => parachutes; set => parachutes = value; }
+    public int Planners { get => planners; set => planners = value; }
+    public int Scores { get; private set; } = 0;
 
     public delegate void GameModeEvent();
 
     public event GameModeEvent OnPlaybackModeOn = delegate { };
     public event GameModeEvent OnPlayModeOn = delegate { };
 
-    private int scores = 0;
+    private JetpackConfiguration jetpackConfiguration;
+    private GameMenuController gameMenuController;
     private List<CollectedItem> collectedCoins = new List<CollectedItem>();
 
-    private void Start() {
-        ChangeScore(-scores);
+    void Start() {
+        jetpackConfiguration = GetComponent<JetpackConfiguration>();
+        gameMenuController = GetComponent<GameMenuController>();
+        UpdateCounters();
+    }
+
+    private void UpdateCounters() {
+        scoreText.text = Scores.ToString();
+        parachutesText.text = Parachutes.ToString();
+        plannersText.text = Planners.ToString();
+        jetpackFuelBar.BarValue = Mathf.RoundToInt(JetPackFuel / jetpackConfiguration.MaxJetPackFuel * 100f);
     }
 
     public void AddCollectedItem(CollectedItem item) {
         collectedCoins.Add(item);
     }
 
-    public int ChangeScore(int diff) {
-        scores = Mathf.Clamp(scores + diff, 0, int.MaxValue);
-        scoreText.text = scores.ToString();
-        return scores;
+    public void ChangeParachutes(int diff) {
+        Parachutes = Mathf.Clamp(diff, 0, int.MaxValue);
+        parachutesText.text = Parachutes.ToString();
+    }
+
+    public bool UseParachute() {
+        if (Parachutes > 0) {
+            Parachutes--;
+            parachutesText.text = Parachutes.ToString();
+            return true;
+        }
+        return false; ;
+    }
+
+    public bool HasParachute() {
+        return Parachutes > 0;
+    }
+
+    public void ChangePlanners(int diff) {
+        Planners = Mathf.Clamp(diff, 0, int.MaxValue);
+        plannersText.text = Planners.ToString();
+    }
+
+    public bool UsePlanner() {
+        if (Planners > 0) {
+            Planners--;
+            plannersText.text = Planners.ToString();
+            return true;
+        }
+        return false; ;
+    }
+
+    public bool HasPlanner() {
+        return Planners > 0;
+    }
+
+    public bool HasFuel() {
+        return JetPackFuel > 0;
+    }
+
+    public float ChangeJetpackFuel(float diff) {
+
+        float tankFreeCapacity = jetpackConfiguration.MaxJetPackFuel - JetPackFuel;
+
+        JetPackFuel = Mathf.Clamp(JetPackFuel + diff, 0, jetpackConfiguration.MaxJetPackFuel);
+        jetpackFuelBar.BarValue = Mathf.RoundToInt(JetPackFuel / jetpackConfiguration.MaxJetPackFuel * 100f);
+
+        if (diff < 0) {
+            return JetPackFuel < Mathf.Abs(diff) ? JetPackFuel : diff;
+        } else {
+            return tankFreeCapacity < diff ? tankFreeCapacity : diff;
+        }
+    }
+
+    public void ChangeScore(int diff) {
+        Scores = Mathf.Clamp(Scores + diff, 0, int.MaxValue);
+        scoreText.text = Scores.ToString();
     }
 
     public void UpdateVisabilityCollectedItems(float angel) {
@@ -46,6 +121,7 @@ public class MyGameManager : MonoBehaviour {
                 }
             }
         });
+        UpdateCounters();
     }
 
     public void DeactivateCollectedItemsAfterAngel(float angel) {
@@ -69,5 +145,9 @@ public class MyGameManager : MonoBehaviour {
         }
         CurrentGameMode = GameMode.play;
         OnPlayModeOn();
+    }
+
+    public void LevelFinished() {
+        gameMenuController.ShowLevelFinishedPanel();
     }
 }

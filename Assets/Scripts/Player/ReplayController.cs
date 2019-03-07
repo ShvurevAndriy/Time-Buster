@@ -100,10 +100,11 @@ public class ReplayController : MonoBehaviour {
         } else {
             trajectoryMarker.ClearAndDestroyForceMarkers();
         }
-
+        positionRecord.Dequeue();
         playbackData = new List<ReplayData>(positionRecord);
         DrawPath();
-        lastSelected = playbackData.Count;
+        lastSelected = playbackData.Count-1;
+        DoPlayBack(lastSelected);
     }
 
     private void OnPlayModeOn() {
@@ -148,6 +149,9 @@ public class ReplayController : MonoBehaviour {
             .setStartBoostYPos(playerMovement.StartBoostYPos)
             .setApexYPos(playerMovement.ApexYPos)
             .setCameraZoom(cameraController.CameraSize)
+            .setJetpackFuel(gameManger.JetPackFuel)
+            .setParachutes(gameManger.Parachutes)
+            .setPlanners(gameManger.Planners)
             .build();
         positionRecord.Enqueue(replayData);
         if (positionRecord.Count > replaySize) {
@@ -160,8 +164,7 @@ public class ReplayController : MonoBehaviour {
     private void ClearForceMarkerBehind(Dictionary<float, MarkerObject> markers, float currentAngel) {
         markers.Keys.Where(k => k < currentAngel).ToList()
             .ForEach(k => {
-                Debug.Break();
-                MarkerObject markerObject = forceMarkers[k];
+                MarkerObject markerObject = markers[k];
                 forceMarkers.Remove(k);
                 markerObject.DestroyNow();
             });
@@ -173,6 +176,9 @@ public class ReplayController : MonoBehaviour {
         cameraController.CameraSize = currentReplayData.cameraZoom;
         playerMovement.currentAngel = currentReplayData.currentAngel;
         gameManger.UpdateVisabilityCollectedItems(currentReplayData.currentAngel);
+        gameManger.JetPackFuel = currentReplayData.jetpackFuel;
+        gameManger.Parachutes = currentReplayData.parachutes;
+        gameManger.Planners = currentReplayData.planners;
     }
 
     private void PreparePlayMode() {

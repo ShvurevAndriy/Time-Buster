@@ -1,19 +1,18 @@
 ﻿using UnityEngine;
-public class CoinsItem : CollectedItem {
+public class FuelItem : CollectedItem {
 
-    [SerializeField] int coinsAmount = 100;
+    [SerializeField] int fuelAmount = 50;
     [SerializeField] Material playback = null;
     [SerializeField] Material normal = null;
 
-    public CoinsItem() : base(true) {
+    public FuelItem() : base(true) {
     }
 
     protected override void ActivateItem() {
-        myGameManager.ChangeScore(coinsAmount);
+        myGameManager.ChangeJetpackFuel(fuelAmount);
     }
 
     protected override void DeactivateItem() {
-        myGameManager.ChangeScore(-coinsAmount);
     }
 
     protected override void VisualizeOnPlayback() {
