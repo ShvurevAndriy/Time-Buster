@@ -871,6 +871,16 @@ PrefabInstance:
       propertyPath: jetPackFuel
       value: 100
       objectReference: {fileID: 0}
+    - target: {fileID: 5773212331154692895, guid: 9961eee4015babc4b8e25f7e46de31bb,
+        type: 3}
+      propertyPath: parachutes
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5773212331154692895, guid: 9961eee4015babc4b8e25f7e46de31bb,
+        type: 3}
+      propertyPath: planners
+      value: 10
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9961eee4015babc4b8e25f7e46de31bb, type: 3}
 --- !u!1 &308815929
@@ -1551,6 +1561,16 @@ PrefabInstance:
       propertyPath: label
       value: 
       objectReference: {fileID: 791807615}
+    - target: {fileID: 3008847790398062211, guid: fe7031253fbce44438b2bcd4e0a50381,
+        type: 3}
+      propertyPath: mobileStylePlayback
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3008847790398062334, guid: fe7031253fbce44438b2bcd4e0a50381,
+        type: 3}
+      propertyPath: m_Interpolate
+      value: 2
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fe7031253fbce44438b2bcd4e0a50381, type: 3}
 --- !u!1 &791807613
@@ -2915,6 +2935,24 @@ MonoBehaviour:
   gamePausePanel: {fileID: 866659388}
   gameEndLevelPanel: {fileID: 1745090112}
   endLevelScoreText: {fileID: 8601733}
+--- !u!114 &1534155903
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1534155901}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d2ee41c16249054ea310c6cad6b9c55, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  xVelocity: 2
+  xAccel: 60
+  slowdownUp: 60
+  yVelocity: -9
+  freeFall: 5
+  slowdownDown: 40
 --- !u!114 &1534155904
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2931,6 +2969,21 @@ MonoBehaviour:
   jetMaxVelocity: Infinity
   maxJetPackFuel: 200
   fuelConsumptionPerSecond: 50
+--- !u!114 &1534155907
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1534155901}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82c10eadfaa0b2a45a6efc32399aefd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  freeFall: 2
+  yVelocity: -5
+  slowdownDown: 20
 --- !u!224 &1589511777 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 224763426186284840, guid: 5eefba205a58c8c4a937c97b87c185a3,
@@ -4026,6 +4079,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalScale.y
       value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4056188725398288474, guid: 36f76d1f5506adb4b96866936f9b7452,
+        type: 3}
+      propertyPath: m_CollisionDetection
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4056188725398288474, guid: 36f76d1f5506adb4b96866936f9b7452,
+        type: 3}
+      propertyPath: m_IsKinematic
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 36f76d1f5506adb4b96866936f9b7452, type: 3}

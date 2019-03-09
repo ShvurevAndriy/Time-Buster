@@ -6,7 +6,7 @@ public class PlayerMovement : MonoBehaviour {
     enum VelocityBehaviorType {
         regular,
         jetpack,
-        paratroop,
+        parachute,
         planner
     }
 
@@ -32,8 +32,6 @@ public class PlayerMovement : MonoBehaviour {
 
     private Dictionary<VelocityBehaviorType, VelocityBehavior> velocityBehaviors;
 
-
-
     public float StartBoostYPos { get; set; }
     public float ApexYPos { get; set; }
     public float CurrentJumpHeight { get; set; }
@@ -50,8 +48,8 @@ public class PlayerMovement : MonoBehaviour {
         velocityBehaviors = new Dictionary<VelocityBehaviorType, VelocityBehavior> {
             { VelocityBehaviorType.regular, new RegularMovementBehavior()},
             { VelocityBehaviorType.jetpack, new JetPackMovementBehavior(FindObjectOfType<JetpackConfiguration>())},
-            { VelocityBehaviorType.paratroop, new RegularMovementBehavior()},
-            { VelocityBehaviorType.planner, new RegularMovementBehavior()}
+            { VelocityBehaviorType.parachute, new ParachuteMovementBehavior(FindObjectOfType<ParachuteConfiguration>())},
+            { VelocityBehaviorType.planner, new PlannerMovementBehavior(FindObjectOfType<PlannerConfiguration>())}
         };
 
         gameManager = FindObjectOfType<MyGameManager>();
@@ -71,7 +69,7 @@ public class PlayerMovement : MonoBehaviour {
 
         if (forceByXAxis) {
             Vector3 centerCursorPos = Camera.main.ScreenToViewportPoint(Input.mousePosition);
-            AngularSpeed += (Mathf.Clamp01(centerCursorPos.x) - 0.5f) * 2 * angularForceCoeff * Mathf.Rad2Deg / radius;
+            AngularSpeed += (Mathf.Clamp01(centerCursorPos.x) - 0.5f) * 2 * JumpPhysics.LinearToAngularVelocity(angularForceCoeff, radius);
         }
 
         currentAngel += AngularSpeed * time;
@@ -90,10 +88,16 @@ public class PlayerMovement : MonoBehaviour {
 
         switch (playerStateController.CurrentJumpState) {
             case JumpState.jetpack:
-                velocityBehaviors[VelocityBehaviorType.jetpack].CalculateVelocities(time, gravity, ref yVelocity, ref angularSpeed);
+                velocityBehaviors[VelocityBehaviorType.jetpack].CalculateVelocities(time, gravity, radius, ref yVelocity, ref angularSpeed);
+                break;
+            case JumpState.patachute:
+                velocityBehaviors[VelocityBehaviorType.parachute].CalculateVelocities(time, gravity, radius, ref yVelocity, ref angularSpeed);
+                break;
+            case JumpState.deltaplan:
+                velocityBehaviors[VelocityBehaviorType.planner].CalculateVelocities(time, gravity, radius, ref yVelocity, ref angularSpeed);
                 break;
             default:
-                velocityBehaviors[VelocityBehaviorType.regular].CalculateVelocities(time, gravity, ref yVelocity, ref angularSpeed);
+                velocityBehaviors[VelocityBehaviorType.regular].CalculateVelocities(time, gravity, radius, ref yVelocity, ref angularSpeed);
                 break;
         }
 
@@ -117,7 +121,7 @@ public class PlayerMovement : MonoBehaviour {
         collision.GetContacts(contactPoints);
         for (int i = 0; i < collision.contactCount; i++) {
             ContactPoint contactPoint = contactPoints[i];
-            if (contactPoint.point.y > transform.position.y + collederEpsilon) {
+            if (contactPoint.point.y > contactPoint.thisCollider.bounds.min.y + collederEpsilon) {
                 gameManager.StartPlaybackMode();
                 return;
             }
@@ -158,7 +162,7 @@ public class PlayerMovement : MonoBehaviour {
         CurrentJumpHeight = JumpPhysics.CalculateNextJumpHeight(forceHeight, minJumpHeight, maxJumpHeight);
         Vector2 velocities = JumpPhysics.CalculateNextJumpVelocities(CurrentJumpHeight, JumpPhysics.g * gravityScale, jumpAngel);
         YVelocity = velocities.y;
-        AngularSpeed = velocities.x * Mathf.Rad2Deg / radius;
+        AngularSpeed = JumpPhysics.LinearToAngularVelocity(velocities.x, radius);
         ApexYPos = CurrentJumpHeight + transform.position.y;
         StartBoostYPos = float.NegativeInfinity;
         OnPlayerJump();
@@ -169,8 +173,57 @@ public class PlayerMovement : MonoBehaviour {
     }
 
     public interface VelocityBehavior {
-        void CalculateVelocities(float time, float gravity, ref float yVelocity, ref float angularSpeed);
+        void CalculateVelocities(float time, float gravity, float radius, ref float yVelocity, ref float angularSpeed);
     }
+
+    public class ParachuteMovementBehavior : VelocityBehavior {
+
+        private ParachuteConfiguration parachuteConfiguration;
+
+        public ParachuteMovementBehavior(ParachuteConfiguration parachuteConfiguration) {
+            this.parachuteConfiguration = parachuteConfiguration;
+        }
+
+        public void CalculateVelocities(float time, float gravity, float radius, ref float yVelocity, ref float angularSpeed) {
+            if (yVelocity > 0) {
+                yVelocity = Mathf.Clamp(yVelocity - parachuteConfiguration.SlowdownUp * time, 0, float.PositiveInfinity); ;
+            } else if (yVelocity >= parachuteConfiguration.YVelocity && yVelocity <= 0) {
+                yVelocity = Mathf.Clamp(yVelocity + parachuteConfiguration.FreeFall * time, float.NegativeInfinity, parachuteConfiguration.YVelocity);
+                angularSpeed = ChangeAngularSpeed(angularSpeed, radius, time);
+
+            } else if (yVelocity < parachuteConfiguration.YVelocity) {
+                angularSpeed = ChangeAngularSpeed(angularSpeed, radius, time);
+                yVelocity = Mathf.Clamp(yVelocity + parachuteConfiguration.SlowdownDown * time, float.NegativeInfinity, parachuteConfiguration.YVelocity);
+            }
+        }
+
+        private float ChangeAngularSpeed(float angularSpeed, float radius, float time) {
+            float parachuteAngularSpeed = JumpPhysics.LinearToAngularVelocity(parachuteConfiguration.XVelocity, radius);
+            if (angularSpeed > parachuteAngularSpeed) {
+                angularSpeed = Mathf.Clamp(angularSpeed - JumpPhysics.LinearToAngularVelocity(parachuteConfiguration.XAccel * time, radius), parachuteAngularSpeed, float.PositiveInfinity);
+            }
+            return angularSpeed;
+        }
+    }
+
+    public class PlannerMovementBehavior : VelocityBehavior {
+
+        private PlannerConfiguration plannerConfiguration;
+
+        public PlannerMovementBehavior(PlannerConfiguration plannerConfiguration) {
+            this.plannerConfiguration = plannerConfiguration;
+        }
+
+        public void CalculateVelocities(float time, float gravity, float radius, ref float yVelocity, ref float angularSpeed) {
+            if (yVelocity >= plannerConfiguration.YVelocity && yVelocity <= 0) {
+                yVelocity = Mathf.Clamp(yVelocity + plannerConfiguration.FreeFall * time, float.NegativeInfinity, plannerConfiguration.YVelocity);
+
+            } else if (yVelocity < plannerConfiguration.YVelocity) {
+                yVelocity = Mathf.Clamp(yVelocity + plannerConfiguration.SlowdownDown * time, float.NegativeInfinity, plannerConfiguration.YVelocity);
+            }
+        }
+    }
+
 
     public class JetPackMovementBehavior : VelocityBehavior {
 
@@ -180,13 +233,13 @@ public class PlayerMovement : MonoBehaviour {
             this.jetpackConfiguration = jetpackConfiguration;
         }
 
-        public void CalculateVelocities(float time, float gravity, ref float yVelocity, ref float angularSpeed) {
+        public void CalculateVelocities(float time, float gravity, float radius, ref float yVelocity, ref float angularSpeed) {
             yVelocity = Mathf.Clamp(yVelocity + jetpackConfiguration.JetThrust * time, float.MinValue, jetpackConfiguration.JetMaxVelocity);
         }
     }
 
     public class RegularMovementBehavior : VelocityBehavior {
-        public void CalculateVelocities(float time, float gravity, ref float yVelocity, ref float angularSpeed) {
+        public void CalculateVelocities(float time, float gravity, float radius, ref float yVelocity, ref float angularSpeed) {
             yVelocity = yVelocity - gravity * time;
         }
     }

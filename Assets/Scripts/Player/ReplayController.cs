@@ -33,7 +33,8 @@ public class ReplayController : MonoBehaviour {
     private int currentFrame;
 
     private ReplayData currentReplayData;
-    
+
+    public bool MobileStylePlayback { get => mobileStylePlayback; private set => mobileStylePlayback = value; }
 
     void Start() {
         label.enabled = false;
@@ -123,6 +124,7 @@ public class ReplayController : MonoBehaviour {
     }
 
     private void OnPlayModeOn() {
+        lastSelected = currentFrame;
         label.enabled = false;
         rigidBody.detectCollisions = true;
         rigidBody.isKinematic = false;

@@ -14,6 +14,9 @@ public class TrajectoryGizmos : MonoBehaviour {
         if (!Application.isPlaying) {
             if (!player) {
                 player = FindObjectOfType<PlayerMovement>();
+                if (!player) {
+                    return;
+                }
             }
             Vector3 lastPos = new Vector3(Mathf.Cos(0) * player.radius, player.transform.position.y, Mathf.Sin(0) * player.radius);
             for (float angel = step; angel < 360.0f; angel += step) {
@@ -21,7 +24,7 @@ public class TrajectoryGizmos : MonoBehaviour {
                 lastPos = currentVector;
             }
             DrawGizmos(lastPos, 0);
-            
+
         }
     }
 

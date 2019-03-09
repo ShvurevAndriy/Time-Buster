@@ -27,4 +27,11 @@ public static class JumpPhysics {
             g * time * time * 0.5f + yVelocity * time + startPos.y,
             Mathf.Sin(Mathf.Deg2Rad * currentAngel) * radius);
     }
+
+    public static float AngularToLinearVelocity(float angularVelocity, float radius) {
+        return angularVelocity * radius / Mathf.Rad2Deg;
+    }
+    public static float LinearToAngularVelocity(float linearVelocity, float radius) {
+        return linearVelocity * Mathf.Rad2Deg / radius;
+    }
 }
