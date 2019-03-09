@@ -1,12 +1,15 @@
 ﻿using UnityEngine;
 
 public class CameraFollow : MonoBehaviour {
+    [Range(-20, 100)] [SerializeField] float yOffset = 0;
+    [Range(-20, 100)] [SerializeField] float lookAtYOffset = 0;
+    [Range(20, 150)] [SerializeField] float distanceToTarget = 20;
+
+    [SerializeField] bool lockCameraOnPlayer = false;
     [SerializeField] bool lookAtPlayer = true;
-    [SerializeField] bool followPlayerByY = false;
-    [Range(-20, 60)] [SerializeField] float yOffset = 0;
-    [Range(-20, 60)] [SerializeField] float yTargetOffset = 0;
-    [SerializeField] float distanceToTarget = 20;
-    [SerializeField] float coeff = 0.5f;
+
+    [SerializeField] float minCameraFov = 40;
+    [SerializeField] float maxCameraFov = 75;
 
     [SerializeField] float increaseZoomTimeEasing = 2;
 
@@ -20,6 +23,7 @@ public class CameraFollow : MonoBehaviour {
     [SerializeField] Easings.Functions increaseCameraSizeEasing = Easings.Functions.QuinticEaseOut;
 
     private PlayerMovement player;
+    private PlayerStateController playerState;
     private MyGameManager gameManager;
 
     private new Camera camera;
@@ -32,42 +36,47 @@ public class CameraFollow : MonoBehaviour {
     private float lastChangedSize;
     private float startDecreasingTime;
     private float radius;
+    private float playerStartYpos;
 
-
-    public float CameraSize { get; set; }
+    public float CameraSize { get => camera.fieldOfView; set => camera.fieldOfView = value; }
 
     void Start() {
         camera = GetComponent<Camera>();
         gameManager = FindObjectOfType<MyGameManager>();
         player = FindObjectOfType<PlayerMovement>();
-        CameraSize = 0;
+        playerState = FindObjectOfType<PlayerStateController>();
+        CameraSize = minCameraFov;
 
         calculatedCameraSize = CameraSize;
         startYCameraPos = camera.transform.position.y;
 
         previousCameraSize = CameraSize;
         startIncreaseingTime = Time.time;
+        playerStartYpos = player.transform.position.y;
     }
 
     void LateUpdate() {
 
         radius = player.radius + distanceToTarget;
-        transform.position = new Vector3(
-            Mathf.Cos(Mathf.Deg2Rad * player.currentAngel) * (radius + CameraSize),
-            yOffset,
-            Mathf.Sin(Mathf.Deg2Rad * player.currentAngel) * (radius + CameraSize));
+        float cameraYPos = yOffset;
 
-        Vector3 lookAt;
-        if (lookAtPlayer) {
-            lookAt = player.transform.position;
-            if (!followPlayerByY) {
-                lookAt.y = yTargetOffset;
-            }
-        } else {
-            lookAt = Vector3.zero;
-            lookAt.y = yTargetOffset;
+        if (lockCameraOnPlayer) {
+            cameraYPos += player.transform.position.y;
         }
-        transform.LookAt(lookAt);
+
+        transform.position = new Vector3(
+            Mathf.Cos(Mathf.Deg2Rad * player.currentAngel) * radius,
+            cameraYPos,
+            Mathf.Sin(Mathf.Deg2Rad * player.currentAngel) * radius);
+
+        Vector3 lookAtPos = player.transform.position;
+        if (lookAtPlayer) {
+            lookAtPos.y += lookAtYOffset;
+            transform.LookAt(lookAtPos);
+        } else {
+            lookAtPos.y = playerStartYpos + lookAtYOffset;
+            transform.LookAt(lookAtPos);
+        }
 
         if (gameManager.CurrentGameMode == GameMode.play) {
             SetCameraSize();
@@ -90,26 +99,37 @@ public class CameraFollow : MonoBehaviour {
                 if (Time.time - startDecreasingTime < noDecreaseZoomTime) {
                     return;
                 }
-                float deltaZoom = CameraSize - calculatedCameraSize;
-
-                float zoomStepPerc = Mathf.InverseLerp(useMinStepFromZoomDelta, useMaxStepFromZoomDelta, Mathf.Clamp(deltaZoom, useMinStepFromZoomDelta, useMaxStepFromZoomDelta));
-                float zoomStep = decreasingZoomStepMin + (decreasingZoomStepMax - decreasingZoomStepMin) * zoomStepPerc;
-
-                CameraSize -= Mathf.Min(CameraSize - calculatedCameraSize, zoomStep);
+                ZoomOut();
             } else {
-                startDecreasingTime = Time.time;
-                float deltaSize = calculatedCameraSize - previousCameraSize;
-                float easingTime = Mathf.Clamp01((Time.time - startIncreaseingTime) / increaseZoomTimeEasing);
-                float easing = Easings.Interpolate(easingTime, increaseCameraSizeEasing);
-                CameraSize = previousCameraSize + deltaSize * easing;
-
+                ZoomIn();
             }
         } else {
             startDecreasingTime = Time.time;
         }
     }
 
+    private void ZoomOut() {
+        float deltaZoom = CameraSize - calculatedCameraSize;
+
+        float zoomStepPerc = Mathf.InverseLerp(useMinStepFromZoomDelta, useMaxStepFromZoomDelta, Mathf.Clamp(deltaZoom, useMinStepFromZoomDelta, useMaxStepFromZoomDelta));
+        float zoomStep = decreasingZoomStepMin + (decreasingZoomStepMax - decreasingZoomStepMin) * zoomStepPerc;
+
+        CameraSize -= Mathf.Min(CameraSize - calculatedCameraSize, zoomStep);
+    }
+
+    private void ZoomIn() {
+        startDecreasingTime = Time.time;
+        float deltaSize = calculatedCameraSize - previousCameraSize;
+        float easingTime = Mathf.Clamp01((Time.time - startIncreaseingTime) / increaseZoomTimeEasing);
+        float easing = Easings.Interpolate(easingTime, increaseCameraSizeEasing);
+        CameraSize = previousCameraSize + deltaSize * easing;
+    }
+
     private float GetCameraZoom() {
-        return player.ApexYPos * coeff;
+        float jumpPercentage = 1;
+        if (playerState.CurrentJumpState != JumpState.jetpack) {
+            jumpPercentage = Mathf.InverseLerp(player.minJumpHeight, player.maxJumpHeight, player.CurrentJumpHeight);
+        }
+        return Mathf.Lerp(minCameraFov, maxCameraFov, jumpPercentage);
     }
 }

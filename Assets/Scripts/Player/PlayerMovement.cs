@@ -76,6 +76,10 @@ public class PlayerMovement : MonoBehaviour {
             gravity,
             transform.position);
 
+        if (ApexYPos < nextPosition.y) {
+            ApexYPos = nextPosition.y;
+        }
+
         switch (playerStateController.CurrentJumpState) {
             case JumpState.jetpack:
                 velocityBehaviors[VelocityBehaviorType.jetpack].CalculateVelocities(time, gravity, ref yVelocity, ref angularSpeed);
@@ -140,7 +144,7 @@ public class PlayerMovement : MonoBehaviour {
             forceHeight = JumpPhysics.CalculateBoostJumpHeight(StartBoostYPos, transform.position.y);
         }
 
-        float CurrentJumpHeight = JumpPhysics.CalculateNextJumpHeight(forceHeight, minJumpHeight, maxJumpHeight);
+        CurrentJumpHeight = JumpPhysics.CalculateNextJumpHeight(forceHeight, minJumpHeight, maxJumpHeight);
         Vector2 velocities = JumpPhysics.CalculateNextJumpVelocities(CurrentJumpHeight, JumpPhysics.g * gravityScale, jumpAngel);
         YVelocity = velocities.y;
         AngularSpeed = velocities.x * Mathf.Rad2Deg / radius;
@@ -166,6 +170,7 @@ public class PlayerMovement : MonoBehaviour {
         }
 
         public void CalculateVelocities(float time, float gravity, ref float yVelocity, ref float angularSpeed) {
+
             yVelocity = Mathf.Clamp(yVelocity + jetpackConfiguration.JetThrust * time, float.MinValue, jetpackConfiguration.JetMaxVelocity);
         }
     }

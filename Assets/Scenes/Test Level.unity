@@ -1282,12 +1282,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1d279d0da51dc9468d62d14bd769c84, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  yOffset: 10
+  lookAtYOffset: 0
+  distanceToTarget: 60
+  lockCameraOnPlayer: 1
   lookAtPlayer: 1
-  followPlayerByY: 0
-  yOffset: 36.6
-  yTargetOffset: 21.3
-  distanceToTarget: 50
-  coeff: 1
+  minCameraFov: 40
+  maxCameraFov: 80
   increaseZoomTimeEasing: 2
   noDecreaseZoomTime: 1
   decreasingZoomStepMin: 0.07
@@ -4268,8 +4269,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 4, y: 3.5454865, z: 0.2}
-  m_Center: {x: 0, y: 0.21880531, z: 0.00000006053357}
+  m_Size: {x: 4, y: 3.4054213, z: 0.2}
+  m_Center: {x: 1.6803754e-15, y: 0.2888379, z: 0.000000059604645}
 --- !u!114 &4334707578199811581
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4375,5 +4376,5 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 3.8216176, y: 0.4, z: 0.2}
-  m_Center: {x: 0.05985635, y: 0, z: -0.000000022005256}
+  m_Size: {x: 3.8216176, y: 0.5498058, z: 0.2}
+  m_Center: {x: 0.059856296, y: 0.07490292, z: -0.000000022504803}
