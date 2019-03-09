@@ -12,7 +12,8 @@ public class ReplayController : MonoBehaviour {
     [SerializeField] Color markerColor = Color.red;
     [SerializeField] Color pathColor = Color.black;
     [SerializeField] bool markReplayForceJumpPoint = true;
-    [SerializeField] private int frameFactor = 100;
+    [SerializeField] int frameFactor = 100;
+    [SerializeField] bool mobileStylePlayback = false;
 
     private Queue<ReplayData> positionRecord;
     private List<ReplayData> playbackData;
@@ -32,6 +33,7 @@ public class ReplayController : MonoBehaviour {
     private int currentFrame;
 
     private ReplayData currentReplayData;
+    
 
     void Start() {
         label.enabled = false;
@@ -62,22 +64,32 @@ public class ReplayController : MonoBehaviour {
     }
 
     private void ProcessUserInput() {
-        if (Input.GetMouseButtonUp(0)) {
-            mouseStartXPos = float.NegativeInfinity;
-            lastSelected = currentFrame;
-        }
-        if (Input.GetMouseButtonDown(0)) {
-            mouseStartXPos = Camera.main.ScreenToViewportPoint(Input.mousePosition).x;
-        }
-        if (Input.GetMouseButton(0)) {
-            if (!float.IsInfinity(mouseStartXPos)) {
-                float currentX = Camera.main.ScreenToViewportPoint(Input.mousePosition).x;
-                int frameDiff = Mathf.RoundToInt((currentX - mouseStartXPos) * frameFactor);
-                currentFrame = Mathf.Clamp(lastSelected - frameDiff, 0, playbackData.Count - 1);
-                DoPlayBack(currentFrame);
+        if (mobileStylePlayback) {
+            if (Input.GetMouseButtonUp(1)) {
+                mouseStartXPos = float.NegativeInfinity;
+                lastSelected = currentFrame;
             }
+            if (Input.GetMouseButtonDown(1)) {
+                mouseStartXPos = Camera.main.ScreenToViewportPoint(Input.mousePosition).x;
+            }
+            if (Input.GetMouseButton(1)) {
+                if (!float.IsInfinity(mouseStartXPos)) {
+                    float currentX = Camera.main.ScreenToViewportPoint(Input.mousePosition).x;
+                    int frameDiff = Mathf.RoundToInt((currentX - mouseStartXPos) * frameFactor);
+                    currentFrame = Mathf.Clamp(lastSelected - frameDiff, 0, playbackData.Count - 1);
+                    DoPlayBack(currentFrame);
+                }
+            }
+        } else {
+            mouseStartXPos = 0;
+            float frameFactor = playbackData.Count;
+            float currentX = Camera.main.ScreenToViewportPoint(Input.mousePosition).x;
+            int frameDiff = Mathf.RoundToInt((currentX - mouseStartXPos) * frameFactor);
+            currentFrame = Mathf.Clamp(lastSelected - frameDiff, 0, playbackData.Count - 1);
+            DoPlayBack(currentFrame);
         }
-        if (Input.GetMouseButtonDown(1)) {
+
+        if (Input.GetMouseButtonDown(0)) {
             PreparePlayMode();
             gameManger.StartPlayMode();
         }
@@ -105,7 +117,7 @@ public class ReplayController : MonoBehaviour {
         positionRecord.Dequeue();
         playbackData = new List<ReplayData>(positionRecord);
         DrawPath();
-        lastSelected = playbackData.Count-1;
+        lastSelected = playbackData.Count - 1;
         currentFrame = lastSelected;
         DoPlayBack(lastSelected);
     }

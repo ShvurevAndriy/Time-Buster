@@ -10,6 +10,8 @@ public class PlayerMovement : MonoBehaviour {
         planner
     }
 
+    private const float collederEpsilon = 0.05f;
+
     [Range(45, 89)] public float jumpAngel = 77f;
     public float minJumpHeight = 5f;
     public float maxJumpHeight = 50f;
@@ -17,9 +19,8 @@ public class PlayerMovement : MonoBehaviour {
     public float forceJumpTimeScale = 3;
     public float radius = 40;
     public float currentAngel = 0;
-    public float paratrooperVelocity = -2f;
-    public float jetThrust = 10f;
-    public float jetMaxVelocity = float.MaxValue;
+    public bool forceByXAxis = false;
+    public float angularForceCoeff = 2f;
 
     private Rigidbody rigidBody;
     private BoxCollider bottomCollider;
@@ -27,8 +28,10 @@ public class PlayerMovement : MonoBehaviour {
     private PlayerStateController playerStateController;
     private float yVelocity = 0;
     private float angularSpeed;
+    private ContactPoint[] contactPoints = new ContactPoint[10];
 
     private Dictionary<VelocityBehaviorType, VelocityBehavior> velocityBehaviors;
+
 
 
     public float StartBoostYPos { get; set; }
@@ -66,6 +69,11 @@ public class PlayerMovement : MonoBehaviour {
         float time = Time.deltaTime * TimeScale;
         float gravity = gravityScale * JumpPhysics.g;
 
+        if (forceByXAxis) {
+            Vector3 centerCursorPos = Camera.main.ScreenToViewportPoint(Input.mousePosition);
+            AngularSpeed += (Mathf.Clamp01(centerCursorPos.x) - 0.5f) * 2 * angularForceCoeff * Mathf.Rad2Deg / radius;
+        }
+
         currentAngel += AngularSpeed * time;
 
         Vector3 nextPosition = JumpPhysics.CalculatePositionAtTime(
@@ -97,27 +105,30 @@ public class PlayerMovement : MonoBehaviour {
         if (gameManager.CurrentGameMode != GameMode.play) {
             return;
         }
-        bool activatePlayback = false;
+
         if (IsInLayerMask(collision.gameObject.layer, LayerMask.GetMask("Hazard"))) {
             gameManager.StartPlaybackMode();
-        } else {
-            foreach (ContactPoint contact in collision.contacts) {
-                switch (contact.thisCollider.name) {
-                    case "Player":
-                        activatePlayback = true;
-                        break;
-                }
-            }
-            if (activatePlayback) {
+            return;
+        }
+
+        if (collision.contactCount > contactPoints.Length) {
+            contactPoints = new ContactPoint[collision.contactCount];
+        }
+        collision.GetContacts(contactPoints);
+        for (int i = 0; i < collision.contactCount; i++) {
+            ContactPoint contactPoint = contactPoints[i];
+            if (contactPoint.point.y > transform.position.y + collederEpsilon) {
                 gameManager.StartPlaybackMode();
-            } else {
-                if (IsInLayerMask(collision.gameObject.layer, LayerMask.GetMask("Level End"))) {
-                    gameManager.LevelFinished();
-                } else {
-                    DoJump();
-                }
+                return;
             }
         }
+
+        if (IsInLayerMask(collision.gameObject.layer, LayerMask.GetMask("Level End"))) {
+            gameManager.LevelFinished();
+        } else {
+            DoJump();
+        }
+
     }
 
     public void SetAppropriateRotation() {
@@ -170,7 +181,6 @@ public class PlayerMovement : MonoBehaviour {
         }
 
         public void CalculateVelocities(float time, float gravity, ref float yVelocity, ref float angularSpeed) {
-
             yVelocity = Mathf.Clamp(yVelocity + jetpackConfiguration.JetThrust * time, float.MinValue, jetpackConfiguration.JetMaxVelocity);
         }
     }
