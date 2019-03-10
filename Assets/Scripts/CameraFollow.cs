@@ -38,7 +38,7 @@ public class CameraFollow : MonoBehaviour {
     private float radius;
     private float playerStartYpos;
 
-    public float CameraSize { get => camera.fieldOfView; set => camera.fieldOfView = value; }
+    public float CameraSize { get; set ; }
 
     void Start() {
         camera = GetComponent<Camera>();
@@ -65,9 +65,9 @@ public class CameraFollow : MonoBehaviour {
         }
 
         transform.position = new Vector3(
-            Mathf.Cos(Mathf.Deg2Rad * player.currentAngel) * radius,
+            Mathf.Cos(Mathf.Deg2Rad * player.currentAngel) * (radius+ CameraSize),
             cameraYPos,
-            Mathf.Sin(Mathf.Deg2Rad * player.currentAngel) * radius);
+            Mathf.Sin(Mathf.Deg2Rad * player.currentAngel) * (radius+ CameraSize));
 
         Vector3 lookAtPos = player.transform.position;
         if (lookAtPlayer) {

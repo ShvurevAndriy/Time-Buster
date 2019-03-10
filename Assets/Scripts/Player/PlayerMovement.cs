@@ -11,6 +11,8 @@ public class PlayerMovement : MonoBehaviour {
     }
 
     private const float collederEpsilon = 0.05f;
+    private const float colliderMoveCoef = 1.001f;
+    private int layerMask;
 
     [Range(45, 89)] public float jumpAngel = 77f;
     public float minJumpHeight = 5f;
@@ -23,7 +25,7 @@ public class PlayerMovement : MonoBehaviour {
     public float angularForceCoeff = 2f;
 
     private Rigidbody rigidBody;
-    private BoxCollider bottomCollider;
+    private BoxCollider boxCollider;
     private MyGameManager gameManager;
     private PlayerStateController playerStateController;
     private float yVelocity = 0;
@@ -31,6 +33,7 @@ public class PlayerMovement : MonoBehaviour {
     private ContactPoint[] contactPoints = new ContactPoint[10];
 
     private Dictionary<VelocityBehaviorType, VelocityBehavior> velocityBehaviors;
+
 
     public float StartBoostYPos { get; set; }
     public float ApexYPos { get; set; }
@@ -54,8 +57,10 @@ public class PlayerMovement : MonoBehaviour {
 
         gameManager = FindObjectOfType<MyGameManager>();
         rigidBody = GetComponent<Rigidbody>();
-        bottomCollider = GetComponent<BoxCollider>();
+        boxCollider = GetComponent<BoxCollider>();
         playerStateController = GetComponent<PlayerStateController>();
+
+        layerMask = LayerMask.GetMask("Hazrd", "Safe Surface", "Level End");
     }
 
     void FixedUpdate() {
@@ -101,7 +106,19 @@ public class PlayerMovement : MonoBehaviour {
                 break;
         }
 
-        rigidBody.velocity = (nextPosition - transform.position) / Time.deltaTime;
+        RaycastHit mHit;
+
+        Vector3 direction = nextPosition - transform.position;
+
+        if (Physics.BoxCast(transform.position, boxCollider.bounds.extents, direction.normalized, out mHit, Quaternion.identity, direction.magnitude, layerMask)) {
+            Vector3 newSpot = transform.position + (direction.normalized * mHit.distance);
+            rigidBody.velocity = (newSpot - transform.position) * colliderMoveCoef / Time.deltaTime;
+        } else {
+            rigidBody.velocity = direction / Time.deltaTime;
+
+        }
+
+
         SetAppropriateRotation();
     }
 
