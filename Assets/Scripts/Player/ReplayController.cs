@@ -91,7 +91,6 @@ public class ReplayController : MonoBehaviour {
         }
 
         if (Input.GetMouseButtonDown(0)) {
-            PreparePlayMode();
             gameManger.StartPlayMode();
         }
     }
@@ -195,9 +194,7 @@ public class ReplayController : MonoBehaviour {
         gameManger.Parachutes = currentReplayData.parachutes;
         gameManger.Planners = currentReplayData.planners;
         gameManger.ActualizeGameDataForPlayback(currentReplayData.currentAngel);
-    }
 
-    private void PreparePlayMode() {
         playerMovement.CurrentJumpHeight = currentReplayData.jumpHeight;
         stateController.CurrentJumpState = currentReplayData.jumpState;
         playerMovement.StartBoostYPos = currentReplayData.startBoostYPos;

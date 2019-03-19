@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using Game.velocity;
 
 public class PlayerMovement : MonoBehaviour {
 
@@ -11,7 +12,7 @@ public class PlayerMovement : MonoBehaviour {
     }
 
     private const float collederEpsilon = 0.05f;
-    private const float colliderMoveCoef = 1.001f;
+    private const float colliderMoveCoef = 1.0001f;
     private int layerMask;
 
     [Range(45, 89)] public float jumpAngel = 77f;
@@ -33,7 +34,7 @@ public class PlayerMovement : MonoBehaviour {
     private ContactPoint[] contactPoints = new ContactPoint[10];
 
     private Dictionary<VelocityBehaviorType, VelocityBehavior> velocityBehaviors;
-
+    private Vector3 nextPosition;
 
     public float StartBoostYPos { get; set; }
     public float ApexYPos { get; set; }
@@ -60,6 +61,8 @@ public class PlayerMovement : MonoBehaviour {
         boxCollider = GetComponent<BoxCollider>();
         playerStateController = GetComponent<PlayerStateController>();
 
+        nextPosition = transform.position;
+
         layerMask = LayerMask.GetMask("Hazrd", "Safe Surface", "Level End");
     }
 
@@ -77,9 +80,11 @@ public class PlayerMovement : MonoBehaviour {
             AngularSpeed += (Mathf.Clamp01(centerCursorPos.x) - 0.5f) * 2 * JumpPhysics.LinearToAngularVelocity(angularForceCoeff, radius);
         }
 
+        transform.position = nextPosition;
+
         currentAngel += AngularSpeed * time;
 
-        Vector3 nextPosition = JumpPhysics.CalculatePositionAtTime(
+        nextPosition = JumpPhysics.CalculatePositionAtTime(
             yVelocity,
             currentAngel,
             radius,
@@ -110,15 +115,13 @@ public class PlayerMovement : MonoBehaviour {
 
         Vector3 direction = nextPosition - transform.position;
 
-        if (Physics.BoxCast(transform.position, boxCollider.bounds.extents, direction.normalized, out mHit, Quaternion.identity, direction.magnitude, layerMask)) {
-            Vector3 newSpot = transform.position + (direction.normalized * mHit.distance);
-            rigidBody.velocity = (newSpot - transform.position) * colliderMoveCoef / Time.deltaTime;
+        if (yVelocity < 0 && Physics.BoxCast(boxCollider.bounds.center, boxCollider.bounds.extents, direction.normalized, out mHit, Quaternion.identity, direction.magnitude, layerMask)) {
+            nextPosition = transform.position + (direction.normalized * mHit.distance);
+            rigidBody.velocity = new Vector3(0, ((nextPosition - transform.position) * colliderMoveCoef / Time.deltaTime).y, 0);
+            currentAngel -= AngularSpeed * time;
         } else {
             rigidBody.velocity = direction / Time.deltaTime;
-
         }
-
-
         SetAppropriateRotation();
     }
 
@@ -170,6 +173,7 @@ public class PlayerMovement : MonoBehaviour {
     }
 
     private void DoJump() {
+        rigidBody.velocity = Vector3.zero;
         TimeScale = 1;
         float forceHeight = 0;
         if (!float.IsNegativeInfinity(StartBoostYPos)) {
@@ -187,77 +191,5 @@ public class PlayerMovement : MonoBehaviour {
 
     public static bool IsInLayerMask(int layer, LayerMask layermask) {
         return layermask == (layermask | (1 << layer));
-    }
-
-    public interface VelocityBehavior {
-        void CalculateVelocities(float time, float gravity, float radius, ref float yVelocity, ref float angularSpeed);
-    }
-
-    public class ParachuteMovementBehavior : VelocityBehavior {
-
-        private ParachuteConfiguration parachuteConfiguration;
-
-        public ParachuteMovementBehavior(ParachuteConfiguration parachuteConfiguration) {
-            this.parachuteConfiguration = parachuteConfiguration;
-        }
-
-        public void CalculateVelocities(float time, float gravity, float radius, ref float yVelocity, ref float angularSpeed) {
-            if (yVelocity > 0) {
-                yVelocity = Mathf.Clamp(yVelocity - parachuteConfiguration.SlowdownUp * time, 0, float.PositiveInfinity); ;
-            } else if (yVelocity >= parachuteConfiguration.YVelocity && yVelocity <= 0) {
-                yVelocity = Mathf.Clamp(yVelocity + parachuteConfiguration.FreeFall * time, float.NegativeInfinity, parachuteConfiguration.YVelocity);
-                angularSpeed = ChangeAngularSpeed(angularSpeed, radius, time);
-
-            } else if (yVelocity < parachuteConfiguration.YVelocity) {
-                angularSpeed = ChangeAngularSpeed(angularSpeed, radius, time);
-                yVelocity = Mathf.Clamp(yVelocity + parachuteConfiguration.SlowdownDown * time, float.NegativeInfinity, parachuteConfiguration.YVelocity);
-            }
-        }
-
-        private float ChangeAngularSpeed(float angularSpeed, float radius, float time) {
-            float parachuteAngularSpeed = JumpPhysics.LinearToAngularVelocity(parachuteConfiguration.XVelocity, radius);
-            if (angularSpeed > parachuteAngularSpeed) {
-                angularSpeed = Mathf.Clamp(angularSpeed - JumpPhysics.LinearToAngularVelocity(parachuteConfiguration.XAccel * time, radius), parachuteAngularSpeed, float.PositiveInfinity);
-            }
-            return angularSpeed;
-        }
-    }
-
-    public class PlannerMovementBehavior : VelocityBehavior {
-
-        private PlannerConfiguration plannerConfiguration;
-
-        public PlannerMovementBehavior(PlannerConfiguration plannerConfiguration) {
-            this.plannerConfiguration = plannerConfiguration;
-        }
-
-        public void CalculateVelocities(float time, float gravity, float radius, ref float yVelocity, ref float angularSpeed) {
-            if (yVelocity >= plannerConfiguration.YVelocity && yVelocity <= 0) {
-                yVelocity = Mathf.Clamp(yVelocity + plannerConfiguration.FreeFall * time, float.NegativeInfinity, plannerConfiguration.YVelocity);
-
-            } else if (yVelocity < plannerConfiguration.YVelocity) {
-                yVelocity = Mathf.Clamp(yVelocity + plannerConfiguration.SlowdownDown * time, float.NegativeInfinity, plannerConfiguration.YVelocity);
-            }
-        }
-    }
-
-
-    public class JetPackMovementBehavior : VelocityBehavior {
-
-        private JetpackConfiguration jetpackConfiguration;
-
-        public JetPackMovementBehavior(JetpackConfiguration jetpackConfiguration) {
-            this.jetpackConfiguration = jetpackConfiguration;
-        }
-
-        public void CalculateVelocities(float time, float gravity, float radius, ref float yVelocity, ref float angularSpeed) {
-            yVelocity = Mathf.Clamp(yVelocity + jetpackConfiguration.JetThrust * time, float.MinValue, jetpackConfiguration.JetMaxVelocity);
-        }
-    }
-
-    public class RegularMovementBehavior : VelocityBehavior {
-        public void CalculateVelocities(float time, float gravity, float radius, ref float yVelocity, ref float angularSpeed) {
-            yVelocity = yVelocity - gravity * time;
-        }
     }
 }

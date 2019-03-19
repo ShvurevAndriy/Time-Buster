@@ -38,7 +38,7 @@ public class CameraFollow : MonoBehaviour {
     private float radius;
     private float playerStartYpos;
 
-    public float CameraSize { get; set ; }
+    public float CameraSize { get; set; }
 
     void Start() {
         camera = GetComponent<Camera>();
@@ -62,12 +62,14 @@ public class CameraFollow : MonoBehaviour {
 
         if (lockCameraOnPlayer) {
             cameraYPos += player.transform.position.y;
+        } else {
+            cameraYPos += playerStartYpos;
         }
 
         transform.position = new Vector3(
-            Mathf.Cos(Mathf.Deg2Rad * player.currentAngel) * (radius+ CameraSize),
+            Mathf.Cos(Mathf.Deg2Rad * player.currentAngel) * (radius + CameraSize),
             cameraYPos,
-            Mathf.Sin(Mathf.Deg2Rad * player.currentAngel) * (radius+ CameraSize));
+            Mathf.Sin(Mathf.Deg2Rad * player.currentAngel) * (radius + CameraSize));
 
         Vector3 lookAtPos = player.transform.position;
         if (lookAtPlayer) {
@@ -126,10 +128,13 @@ public class CameraFollow : MonoBehaviour {
     }
 
     private float GetCameraZoom() {
+        return (player.ApexYPos / player.minJumpHeight) * minCameraFov;
+        /*
         float jumpPercentage = 1;
         if (playerState.CurrentJumpState != JumpState.jetpack) {
             jumpPercentage = Mathf.InverseLerp(player.minJumpHeight, player.maxJumpHeight, player.CurrentJumpHeight);
         }
         return Mathf.Lerp(minCameraFov, maxCameraFov, jumpPercentage);
+        */
     }
 }

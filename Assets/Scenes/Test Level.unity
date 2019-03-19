@@ -1473,12 +1473,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1d279d0da51dc9468d62d14bd769c84, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  yOffset: 10
-  lookAtYOffset: 0
-  distanceToTarget: 60
-  lockCameraOnPlayer: 1
-  lookAtPlayer: 1
-  minCameraFov: 0
+  yOffset: 31
+  lookAtYOffset: 18
+  distanceToTarget: 67
+  lockCameraOnPlayer: 0
+  lookAtPlayer: 0
+  minCameraFov: 15
   maxCameraFov: 100
   increaseZoomTimeEasing: 2
   noDecreaseZoomTime: 1
@@ -4478,8 +4478,8 @@ MonoBehaviour:
   maxJumpHeight: 70
   gravityScale: 3
   forceJumpTimeScale: 3
-  radius: 37.949078
-  currentAngel: 339.8221
+  radius: 42.30189
+  currentAngel: 0.5417637
   forceByXAxis: 0
   angularForceCoeff: 0.05
 --- !u!1 &3008847790097097351
@@ -4532,8 +4532,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3008847790097097351}
-  m_LocalRotation: {x: 0, y: -0.8200414, z: 0, w: -0.5723042}
-  m_LocalPosition: {x: 35.62, y: 11.44, z: -13.09}
+  m_LocalRotation: {x: 0, y: 0.70375586, z: 0, w: 0.7104419}
+  m_LocalPosition: {x: 42.3, y: 11.44, z: 0.4}
   m_LocalScale: {x: 0.66463, y: 1, z: 1}
   m_Children:
   - {fileID: 3008847791175704982}
