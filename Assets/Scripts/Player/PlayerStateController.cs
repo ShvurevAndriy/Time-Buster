@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityStandardAssets.CrossPlatformInput;
 
 public enum JumpState {
     flyUp = 0,
@@ -48,7 +49,7 @@ public class PlayerStateController : MonoBehaviour {
             return;
         }
 
-        if (Input.GetButtonUp("Jump")) {
+        if (CrossPlatformInputManager.GetButtonUp("Jump")) {
             needSkipFirstAfterPlayback = false;
         }
 
@@ -78,12 +79,12 @@ public class PlayerStateController : MonoBehaviour {
                 ProcessUserInput();
                 break;
             case JumpState.deltaplan:
-                if (Input.GetButtonDown("Fire2")) {
+                if (CrossPlatformInputManager.GetButtonDown("Fire2")) {
                     TurneOffDeltaplan();
                 }
                 break;
             case JumpState.patachute:
-                if (Input.GetButtonDown("Fire3")) {
+                if (CrossPlatformInputManager.GetButtonDown("Fire3")) {
                     TurneOffParachute();
                 }
                 break;
@@ -107,7 +108,7 @@ public class PlayerStateController : MonoBehaviour {
 
     private void ProcessUserInput() {
 
-        if (Input.GetButtonDown("Jump")) {
+        if (CrossPlatformInputManager.GetButtonDown("Jump")) {
             if (needSkipFirstAfterPlayback) {
                 needSkipFirstAfterPlayback = false;
             } else {
@@ -119,7 +120,7 @@ public class PlayerStateController : MonoBehaviour {
 
     private void CheckForParachuteActivation() {
         if (!forceTrigger) {
-            if (Input.GetButtonDown("Fire3") && gameManager.UseParachute()) {
+            if (CrossPlatformInputManager.GetButtonDown("Fire3") && gameManager.UseParachute()) {
                 animator.SetTrigger("Parachute");
                 ChanegeJumpState(JumpState.patachute);
             }
@@ -127,19 +128,19 @@ public class PlayerStateController : MonoBehaviour {
     }
 
     private void ProcessUserJetpackInput() {
-        if (Input.GetButtonDown("Fire1") && gameManager.HasFuel()) {
+        if (CrossPlatformInputManager.GetButtonDown("Fire1") && gameManager.HasFuel()) {
             if (!forceTrigger) {
                 animator.SetTrigger("JetPack");
                 ChanegeJumpState(JumpState.jetpack);
             }
-        } else if (Input.GetButtonUp("Fire1") && CurrentJumpState == JumpState.jetpack) {
+        } else if (CrossPlatformInputManager.GetButtonUp("Fire1") && CurrentJumpState == JumpState.jetpack) {
             TurneOffJetpack();
         }
     }
 
     private void CheckForDeltaplanActivation() {
         if (!forceTrigger) {
-            if (Input.GetButtonDown("Fire2") && gameManager.UsePlanner()) {
+            if (CrossPlatformInputManager.GetButtonDown("Fire2") && gameManager.UsePlanner()) {
                 animator.SetTrigger("Deltaplan");
                 ChanegeJumpState(JumpState.deltaplan);
             }

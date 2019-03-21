@@ -14,7 +14,9 @@ public class MyGameManager : MonoBehaviour {
     [SerializeField] Text scoreText = null;
     [SerializeField] Text parachutesText = null;
     [SerializeField] Text plannersText = null;
+    [SerializeField] Text replayText = null;
     [SerializeField] ProgressBar jetpackFuelBar = null;
+    [SerializeField] ProgressBar recordBar = null;
 
     [SerializeField] float jetPackFuel = 0;
     [SerializeField] int parachutes = 0;
@@ -36,6 +38,7 @@ public class MyGameManager : MonoBehaviour {
     private List<CollectedItem> collectedCoins = new List<CollectedItem>();
 
     void Start() {
+        replayText.enabled = false;
         jetpackConfiguration = GetComponent<JetpackConfiguration>();
         gameMenuController = GetComponent<GameMenuController>();
         UpdateCounters();
@@ -64,6 +67,10 @@ public class MyGameManager : MonoBehaviour {
             return true;
         }
         return false; ;
+    }
+
+    public void SetRecordRatio(float percentage) {
+        recordBar.BarValue = Mathf.RoundToInt(percentage * 100f);
     }
 
     public bool HasParachute() {
@@ -134,6 +141,7 @@ public class MyGameManager : MonoBehaviour {
             Debug.LogError("Call StartPlaybackMode from incorrect mode");
             return;
         }
+        replayText.enabled = true;
         CurrentGameMode = GameMode.playback;
         OnPlaybackModeOn();
     }
@@ -143,6 +151,7 @@ public class MyGameManager : MonoBehaviour {
             Debug.LogError("Call StartPlayMode from incorrect mode");
             return;
         }
+        replayText.enabled = false;
         CurrentGameMode = GameMode.play;
         OnPlayModeOn();
     }

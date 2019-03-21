@@ -6,10 +6,9 @@ public class CameraFollow : MonoBehaviour {
     [Range(20, 150)] [SerializeField] float distanceToTarget = 20;
 
     [SerializeField] bool lockCameraOnPlayer = false;
-    [SerializeField] bool lookAtPlayer = true;
 
-    [SerializeField] float minCameraFov = 40;
-    [SerializeField] float maxCameraFov = 75;
+    [SerializeField] float minDistance = 40;
+    [SerializeField] float maxDistance = 75;
 
     [SerializeField] float increaseZoomTimeEasing = 2;
 
@@ -29,14 +28,13 @@ public class CameraFollow : MonoBehaviour {
     private new Camera camera;
     private float calculatedCameraSize;
 
-    private float startYCameraPos;
     private float previousCameraSize;
 
     private float startIncreaseingTime;
     private float lastChangedSize;
     private float startDecreasingTime;
     private float radius;
-    private float playerStartYpos;
+    private float cameraStartYpos;
 
     public float CameraSize { get; set; }
 
@@ -45,25 +43,37 @@ public class CameraFollow : MonoBehaviour {
         gameManager = FindObjectOfType<MyGameManager>();
         player = FindObjectOfType<PlayerMovement>();
         playerState = FindObjectOfType<PlayerStateController>();
-        CameraSize = minCameraFov;
+        CameraSize = minDistance;
+
+        float? yMax = GameObject.FindGameObjectWithTag("Roof")?.transform.position.y;
+        float? yMin = GameObject.FindGameObjectWithTag("Floor")?.transform.position.y;
+        if (yMax.HasValue && yMin.HasValue) {
+            cameraStartYpos = Mathf.Abs(yMax.Value + yMin.Value) / 2;
+        } else {
+            cameraStartYpos = camera.transform.position.y;
+        }
 
         calculatedCameraSize = CameraSize;
-        startYCameraPos = camera.transform.position.y;
 
         previousCameraSize = CameraSize;
         startIncreaseingTime = Time.time;
-        playerStartYpos = player.transform.position.y;
     }
 
     void LateUpdate() {
 
         radius = player.radius + distanceToTarget;
-        float cameraYPos = yOffset;
+        float cameraYPos;
+        Vector3 lookAtPos;
 
         if (lockCameraOnPlayer) {
-            cameraYPos += player.transform.position.y;
+            cameraYPos = yOffset + player.transform.position.y;
+            lookAtPos = player.transform.position;
+            lookAtPos.y += lookAtYOffset;
         } else {
-            cameraYPos += playerStartYpos;
+            lookAtPos = Vector3.zero;
+            lookAtPos.y = cameraStartYpos;
+            cameraYPos = cameraStartYpos;
+
         }
 
         transform.position = new Vector3(
@@ -71,14 +81,7 @@ public class CameraFollow : MonoBehaviour {
             cameraYPos,
             Mathf.Sin(Mathf.Deg2Rad * player.currentAngel) * (radius + CameraSize));
 
-        Vector3 lookAtPos = player.transform.position;
-        if (lookAtPlayer) {
-            lookAtPos.y += lookAtYOffset;
-            transform.LookAt(lookAtPos);
-        } else {
-            lookAtPos.y = playerStartYpos + lookAtYOffset;
-            transform.LookAt(lookAtPos);
-        }
+        transform.LookAt(lookAtPos);
 
         if (gameManager.CurrentGameMode == GameMode.play) {
             SetCameraSize();
@@ -91,11 +94,9 @@ public class CameraFollow : MonoBehaviour {
             if (lastChangedSize < calculatedCameraSize) {
                 previousCameraSize = CameraSize;
                 startIncreaseingTime = Time.time;
-
             }
             lastChangedSize = calculatedCameraSize;
         }
-
         if (Mathf.Abs(calculatedCameraSize - CameraSize) > Mathf.Epsilon) {
             if (CameraSize > calculatedCameraSize) {
                 if (Time.time - startDecreasingTime < noDecreaseZoomTime) {
@@ -112,10 +113,8 @@ public class CameraFollow : MonoBehaviour {
 
     private void ZoomOut() {
         float deltaZoom = CameraSize - calculatedCameraSize;
-
         float zoomStepPerc = Mathf.InverseLerp(useMinStepFromZoomDelta, useMaxStepFromZoomDelta, Mathf.Clamp(deltaZoom, useMinStepFromZoomDelta, useMaxStepFromZoomDelta));
         float zoomStep = decreasingZoomStepMin + (decreasingZoomStepMax - decreasingZoomStepMin) * zoomStepPerc;
-
         CameraSize -= Mathf.Min(CameraSize - calculatedCameraSize, zoomStep);
     }
 
@@ -128,13 +127,14 @@ public class CameraFollow : MonoBehaviour {
     }
 
     private float GetCameraZoom() {
-        return (player.ApexYPos / player.minJumpHeight) * minCameraFov;
-        /*
-        float jumpPercentage = 1;
-        if (playerState.CurrentJumpState != JumpState.jetpack) {
-            jumpPercentage = Mathf.InverseLerp(player.minJumpHeight, player.maxJumpHeight, player.CurrentJumpHeight);
+        if (lockCameraOnPlayer) {
+            float jumpPercentage = 1;
+            if (playerState.CurrentJumpState != JumpState.jetpack) {
+                jumpPercentage = Mathf.InverseLerp(player.minJumpHeight, player.maxJumpHeight, player.CurrentJumpHeight);
+            }
+            return Mathf.Lerp(minDistance, maxDistance, jumpPercentage);
+        } else {
+            return Mathf.Abs(camera.transform.position.y - player.transform.position.y) * minDistance;
         }
-        return Mathf.Lerp(minCameraFov, maxCameraFov, jumpPercentage);
-        */
     }
 }

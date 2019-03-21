@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System;
+using UnityStandardAssets.CrossPlatformInput;
 
 public class ReplayController : MonoBehaviour {
     [SerializeField] int replaySize = 100;
-    [SerializeField] Text label = null;
-    [SerializeField] ProgressBar recordBar = null;
     [SerializeField] float pathMarkerScale = 0.2f;
     [SerializeField] Color markerColor = Color.red;
     [SerializeField] Color pathColor = Color.black;
@@ -37,7 +36,6 @@ public class ReplayController : MonoBehaviour {
     public bool MobileStylePlayback { get => mobileStylePlayback; private set => mobileStylePlayback = value; }
 
     void Start() {
-        label.enabled = false;
         cameraController = FindObjectOfType<CameraFollow>();
         markersPool = FindObjectOfType<MarkersPool>();
         gameManger = FindObjectOfType<MyGameManager>();
@@ -53,14 +51,15 @@ public class ReplayController : MonoBehaviour {
     void FixedUpdate() {
         if (gameManger.CurrentGameMode == GameMode.play) {
             DoRecord();
-            recordBar.BarValue = Mathf.RoundToInt((float)positionRecord.Count / replaySize * 100f);
+            gameManger.SetRecordRatio((float)positionRecord.Count / replaySize);
+           
         }
     }
 
     void Update() {
         if (gameManger.CurrentGameMode == GameMode.playback) {
             ProcessUserInput();
-            recordBar.BarValue = Mathf.RoundToInt((float)currentFrame / replaySize * 100f);
+            gameManger.SetRecordRatio((float)currentFrame / replaySize);
         }
     }
 
@@ -84,20 +83,19 @@ public class ReplayController : MonoBehaviour {
         } else {
             mouseStartXPos = 0;
             float frameFactor = playbackData.Count;
-            float currentX = Camera.main.ScreenToViewportPoint(Input.mousePosition).x;
+            float currentX = Camera.main.ScreenToViewportPoint(CrossPlatformInputManager.mousePosition).x;
             int frameDiff = Mathf.RoundToInt((currentX - mouseStartXPos) * frameFactor);
             currentFrame = Mathf.Clamp(lastSelected - frameDiff, 0, playbackData.Count - 1);
             DoPlayBack(currentFrame);
         }
 
-        if (Input.GetMouseButtonDown(0)) {
+        if (CrossPlatformInputManager.GetButtonDown("Jump")) {
             gameManger.StartPlayMode();
         }
     }
 
     private void OnPlaybackModeOn() {
         mouseStartXPos = float.NegativeInfinity;
-        label.enabled = true;
         rigidBody.detectCollisions = false;
         rigidBody.collisionDetectionMode = CollisionDetectionMode.Discrete;
         rigidBody.isKinematic = true;
@@ -124,7 +122,6 @@ public class ReplayController : MonoBehaviour {
 
     private void OnPlayModeOn() {
         lastSelected = currentFrame;
-        label.enabled = false;
         rigidBody.detectCollisions = true;
         rigidBody.isKinematic = false;
         rigidBody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;

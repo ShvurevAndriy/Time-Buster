@@ -57,6 +57,7 @@ public class PlayerMovement : MonoBehaviour {
         };
 
         gameManager = FindObjectOfType<MyGameManager>();
+        gameManager.OnPlayModeOn += OnPlayMode;
         rigidBody = GetComponent<Rigidbody>();
         boxCollider = GetComponent<BoxCollider>();
         playerStateController = GetComponent<PlayerStateController>();
@@ -153,6 +154,10 @@ public class PlayerMovement : MonoBehaviour {
             DoJump();
         }
 
+    }
+
+    private void OnPlayMode() {
+        nextPosition = transform.position;
     }
 
     public void SetAppropriateRotation() {
