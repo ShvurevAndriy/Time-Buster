@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class CameraFollow : MonoBehaviour {
     [Range(-20, 100)] [SerializeField] float yOffset = 0;
@@ -24,6 +25,8 @@ public class CameraFollow : MonoBehaviour {
     private PlayerMovement player;
     private PlayerStateController playerState;
     private MyGameManager gameManager;
+    private AccurateNextPositionFinder positionFinder;
+    private BoxCollider boxCollider;
 
     private new Camera camera;
     private float calculatedCameraSize;
@@ -35,28 +38,54 @@ public class CameraFollow : MonoBehaviour {
     private float startDecreasingTime;
     private float radius;
     private float cameraStartYpos;
+    private float maxYDistanceFromCenter;
+    private Vector3 collidingPoint;
+
+    private float yMax;
+    private float yMin;
 
     public float CameraSize { get; set; }
+    public Vector3 CollidingPoint { get => collidingPoint; private set => collidingPoint = value; }
 
     void Start() {
         camera = GetComponent<Camera>();
+        positionFinder = GetComponent<AccurateNextPositionFinder>();
         gameManager = FindObjectOfType<MyGameManager>();
         player = FindObjectOfType<PlayerMovement>();
+        boxCollider = player.GetComponent<BoxCollider>();
+        player.OnPlayerJump += UpdateLandingPoint;
         playerState = FindObjectOfType<PlayerStateController>();
-        CameraSize = minDistance;
+        playerState.OnJetpackOff += UpdateLandingPoint;
 
-        float? yMax = GameObject.FindGameObjectWithTag("Roof")?.transform.position.y;
-        float? yMin = GameObject.FindGameObjectWithTag("Floor")?.transform.position.y;
-        if (yMax.HasValue && yMin.HasValue) {
-            cameraStartYpos = Mathf.Abs(yMax.Value + yMin.Value) / 2;
+
+        if (lockCameraOnPlayer) {
+            CameraSize = minDistance;
         } else {
-            cameraStartYpos = camera.transform.position.y;
+            yMax = GameObject.FindGameObjectWithTag("Roof").transform.position.y;
+            yMin = GameObject.FindGameObjectWithTag("Floor").transform.position.y;
+            cameraStartYpos = Mathf.Abs(yMax + yMin) / 2;
+            maxYDistanceFromCenter = Mathf.Abs(yMax - yMin) / 2;
+            CameraSize = maxDistance;
         }
 
         calculatedCameraSize = CameraSize;
 
         previousCameraSize = CameraSize;
         startIncreaseingTime = Time.time;
+    }
+
+    private void UpdateLandingPoint() {
+        if (!lockCameraOnPlayer) {
+            positionFinder.PredictTuchPoint(player.YVelocity,
+                player.AngularSpeed,
+                player.currentAngel,
+                player.radius,
+                player.gravityScale * JumpPhysics.g,
+                JumpPhysics.layerMask,
+                player.transform.position,
+                out collidingPoint,
+                boxCollider);
+        }
     }
 
     void LateUpdate() {
@@ -127,14 +156,20 @@ public class CameraFollow : MonoBehaviour {
     }
 
     private float GetCameraZoom() {
-        if (lockCameraOnPlayer) {
-            float jumpPercentage = 1;
-            if (playerState.CurrentJumpState != JumpState.jetpack) {
-                jumpPercentage = Mathf.InverseLerp(player.minJumpHeight, player.maxJumpHeight, player.CurrentJumpHeight);
-            }
-            return Mathf.Lerp(minDistance, maxDistance, jumpPercentage);
+        float jumpPercentage;
+
+        if (playerState.CurrentJumpState == JumpState.jetpack) {
+            jumpPercentage = 1;
         } else {
-            return Mathf.Abs(camera.transform.position.y - player.transform.position.y) * minDistance;
+            if (lockCameraOnPlayer) {
+                jumpPercentage = Mathf.InverseLerp(player.minJumpHeight, player.maxJumpHeight, player.CurrentJumpHeight);
+            } else {
+
+                float deltaY = Mathf.Max(Mathf.Abs(camera.transform.position.y - collidingPoint.y), Mathf.Abs(camera.transform.position.y - player.CurrentJumpHeight)); 
+                jumpPercentage = Mathf.InverseLerp(0, maxYDistanceFromCenter, Mathf.Abs(camera.transform.position.y - collidingPoint.y));
+            }
         }
+        return Mathf.Lerp(minDistance, maxDistance, jumpPercentage);
     }
+
 }

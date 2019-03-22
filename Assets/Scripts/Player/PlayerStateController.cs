@@ -28,6 +28,10 @@ public class PlayerStateController : MonoBehaviour {
 
     public JumpState CurrentJumpState { get; set; }
 
+    public delegate void PlayerOnJetpackOffAction();
+
+    public event PlayerOnJetpackOffAction OnJetpackOff = delegate { };
+
     void Start() {
         gameManager = FindObjectOfType<MyGameManager>();
         gameManager.OnPlaybackModeOn += OnPlaybackModeOn;
@@ -167,6 +171,7 @@ public class PlayerStateController : MonoBehaviour {
         } else {
             ChanegeJumpState(JumpState.flyDown);
         }
+        OnJetpackOff();
     }
 
     private void OnPlaybackModeOn() {
@@ -175,7 +180,7 @@ public class PlayerStateController : MonoBehaviour {
     }
 
     private void OnPlayModeOn() {
-        needSkipFirstAfterPlayback = !replayController.MobileStylePlayback;
+        needSkipFirstAfterPlayback = true;
         animator.ResetTrigger("Play Back");
         ChanegeJumpState(CurrentJumpState);
         if (CurrentJumpState == JumpState.force) {

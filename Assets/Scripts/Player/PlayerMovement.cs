@@ -13,7 +13,7 @@ public class PlayerMovement : MonoBehaviour {
 
     private const float collederEpsilon = 0.05f;
     private const float colliderMoveCoef = 1.0001f;
-    private int layerMask;
+
 
     [Range(45, 89)] public float jumpAngel = 77f;
     public float minJumpHeight = 5f;
@@ -48,7 +48,13 @@ public class PlayerMovement : MonoBehaviour {
     public event PlayerOnJumpAction OnPlayerJump = delegate { };
     public event PlayerOnJumpAction OnPlayerForeJump = delegate { };
 
+    private MarkersPool markersPool;
+
+
+
     void Start() {
+        markersPool = FindObjectOfType<MarkersPool>();
+
         velocityBehaviors = new Dictionary<VelocityBehaviorType, VelocityBehavior> {
             { VelocityBehaviorType.regular, new RegularMovementBehavior()},
             { VelocityBehaviorType.jetpack, new JetPackMovementBehavior(FindObjectOfType<JetpackConfiguration>())},
@@ -63,8 +69,6 @@ public class PlayerMovement : MonoBehaviour {
         playerStateController = GetComponent<PlayerStateController>();
 
         nextPosition = transform.position;
-
-        layerMask = LayerMask.GetMask("Hazrd", "Safe Surface", "Level End");
     }
 
     void FixedUpdate() {
@@ -83,11 +87,12 @@ public class PlayerMovement : MonoBehaviour {
 
         transform.position = nextPosition;
 
-        currentAngel += AngularSpeed * time;
+        float previousAngel = currentAngel;
 
         nextPosition = JumpPhysics.CalculatePositionAtTime(
             yVelocity,
-            currentAngel,
+            AngularSpeed,
+            ref currentAngel,
             radius,
             time,
             gravity,
@@ -116,10 +121,10 @@ public class PlayerMovement : MonoBehaviour {
 
         Vector3 direction = nextPosition - transform.position;
 
-        if (yVelocity < 0 && Physics.BoxCast(boxCollider.bounds.center, boxCollider.bounds.extents, direction.normalized, out mHit, Quaternion.identity, direction.magnitude, layerMask)) {
+        if (yVelocity < 0 && Physics.BoxCast(boxCollider.bounds.center, boxCollider.bounds.extents, direction.normalized, out mHit, transform.rotation, direction.magnitude, JumpPhysics.layerMask)) {
             nextPosition = transform.position + (direction.normalized * mHit.distance);
             rigidBody.velocity = new Vector3(0, ((nextPosition - transform.position) * colliderMoveCoef / Time.deltaTime).y, 0);
-            currentAngel -= AngularSpeed * time;
+            currentAngel = previousAngel;
         } else {
             rigidBody.velocity = direction / Time.deltaTime;
         }
@@ -179,6 +184,7 @@ public class PlayerMovement : MonoBehaviour {
 
     private void DoJump() {
         rigidBody.velocity = Vector3.zero;
+        nextPosition = transform.position;
         TimeScale = 1;
         float forceHeight = 0;
         if (!float.IsNegativeInfinity(StartBoostYPos)) {
@@ -191,6 +197,7 @@ public class PlayerMovement : MonoBehaviour {
         AngularSpeed = JumpPhysics.LinearToAngularVelocity(velocities.x, radius);
         ApexYPos = CurrentJumpHeight + transform.position.y;
         StartBoostYPos = float.NegativeInfinity;
+
         OnPlayerJump();
     }
 

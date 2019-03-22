@@ -11,11 +11,11 @@ public class ReplayController : MonoBehaviour {
     [SerializeField] Color markerColor = Color.red;
     [SerializeField] Color pathColor = Color.black;
     [SerializeField] bool markReplayForceJumpPoint = true;
-    [SerializeField] int frameFactor = 100;
-    [SerializeField] bool mobileStylePlayback = false;
+    [SerializeField] float frameFactor = 100;
 
     private Queue<ReplayData> positionRecord;
     private List<ReplayData> playbackData;
+    private BoxCollider boxCollider;
     private TrajectoryMarker trajectoryMarker;
     private MarkersPool markersPool;
     private MyGameManager gameManger;
@@ -27,13 +27,9 @@ public class ReplayController : MonoBehaviour {
     private Dictionary<float, MarkerObject> forceMarkersToDelete = new Dictionary<float, MarkerObject>();
     private List<MarkerObject> path = new List<MarkerObject>();
 
-    private float mouseStartXPos;
-    private int lastSelected;
     private int currentFrame;
 
     private ReplayData currentReplayData;
-
-    public bool MobileStylePlayback { get => mobileStylePlayback; private set => mobileStylePlayback = value; }
 
     void Start() {
         cameraController = FindObjectOfType<CameraFollow>();
@@ -45,6 +41,7 @@ public class ReplayController : MonoBehaviour {
         trajectoryMarker = GetComponent<TrajectoryMarker>();
         playerMovement = GetComponent<PlayerMovement>();
         stateController = GetComponent<PlayerStateController>();
+        boxCollider = GetComponent<BoxCollider>();
         positionRecord = new Queue<ReplayData>();
     }
 
@@ -52,7 +49,6 @@ public class ReplayController : MonoBehaviour {
         if (gameManger.CurrentGameMode == GameMode.play) {
             DoRecord();
             gameManger.SetRecordRatio((float)positionRecord.Count / replaySize);
-           
         }
     }
 
@@ -64,30 +60,8 @@ public class ReplayController : MonoBehaviour {
     }
 
     private void ProcessUserInput() {
-        if (mobileStylePlayback) {
-            if (Input.GetMouseButtonUp(1)) {
-                mouseStartXPos = float.NegativeInfinity;
-                lastSelected = currentFrame;
-            }
-            if (Input.GetMouseButtonDown(1)) {
-                mouseStartXPos = Camera.main.ScreenToViewportPoint(Input.mousePosition).x;
-            }
-            if (Input.GetMouseButton(1)) {
-                if (!float.IsInfinity(mouseStartXPos)) {
-                    float currentX = Camera.main.ScreenToViewportPoint(Input.mousePosition).x;
-                    int frameDiff = Mathf.RoundToInt((currentX - mouseStartXPos) * frameFactor);
-                    currentFrame = Mathf.Clamp(lastSelected - frameDiff, 0, playbackData.Count - 1);
-                    DoPlayBack(currentFrame);
-                }
-            }
-        } else {
-            mouseStartXPos = 0;
-            float frameFactor = playbackData.Count;
-            float currentX = Camera.main.ScreenToViewportPoint(CrossPlatformInputManager.mousePosition).x;
-            int frameDiff = Mathf.RoundToInt((currentX - mouseStartXPos) * frameFactor);
-            currentFrame = Mathf.Clamp(lastSelected - frameDiff, 0, playbackData.Count - 1);
-            DoPlayBack(currentFrame);
-        }
+        currentFrame = Mathf.Clamp(Mathf.RoundToInt(currentFrame + CrossPlatformInputManager.GetAxis("Mouse X") * frameFactor), 0, playbackData.Count - 1);
+        DoPlayBack(currentFrame);
 
         if (CrossPlatformInputManager.GetButtonDown("Jump")) {
             gameManger.StartPlayMode();
@@ -95,7 +69,6 @@ public class ReplayController : MonoBehaviour {
     }
 
     private void OnPlaybackModeOn() {
-        mouseStartXPos = float.NegativeInfinity;
         rigidBody.detectCollisions = false;
         rigidBody.collisionDetectionMode = CollisionDetectionMode.Discrete;
         rigidBody.isKinematic = true;
@@ -112,20 +85,22 @@ public class ReplayController : MonoBehaviour {
         } else {
             trajectoryMarker.ClearAndDestroyForceMarkers();
         }
-        positionRecord.Dequeue();
+
+        ReplayData replayData = positionRecord.Peek();
+        while (Physics.BoxCast(replayData.position, boxCollider.bounds.extents, Vector3.zero, Quaternion.Euler(0, 90 - replayData.currentAngel, 0), 0)) {
+            replayData = positionRecord.Dequeue();
+        }
         playbackData = new List<ReplayData>(positionRecord);
         DrawPath();
-        lastSelected = playbackData.Count - 1;
-        currentFrame = lastSelected;
-        DoPlayBack(lastSelected);
+        currentFrame = playbackData.Count - 1;
+        DoPlayBack(currentFrame);
     }
 
     private void OnPlayModeOn() {
-        lastSelected = currentFrame;
         rigidBody.detectCollisions = true;
         rigidBody.isKinematic = false;
         rigidBody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
-        positionRecord = new Queue<ReplayData>(playbackData.GetRange(0, lastSelected));
+        positionRecord = new Queue<ReplayData>(playbackData.GetRange(0, currentFrame));
         path.ForEach(m => m.DestroyNow());
         path.Clear();
         gameManger.DeactivateCollectedItemsAfterAngel(playerMovement.currentAngel);
@@ -140,7 +115,7 @@ public class ReplayController : MonoBehaviour {
 
     private void DrawPath() {
         foreach (ReplayData replayData in playbackData) {
-            path.Add(markersPool.GetMarker(replayData.posotion, pathMarkerScale, pathColor, 0));
+            path.Add(markersPool.GetMarker(replayData.position, pathMarkerScale, pathColor, 0));
         }
     }
 
@@ -184,7 +159,7 @@ public class ReplayController : MonoBehaviour {
 
     private void DoPlayBack(int frame) {
         currentReplayData = playbackData[frame];
-        transform.position = currentReplayData.posotion;
+        transform.position = currentReplayData.position;
         cameraController.CameraSize = currentReplayData.cameraZoom;
         playerMovement.currentAngel = currentReplayData.currentAngel;
         gameManger.JetPackFuel = currentReplayData.jetpackFuel;

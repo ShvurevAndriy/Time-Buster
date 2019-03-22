@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 public class CoinsItem : CollectedItem {
 
-    [SerializeField] int coinsAmount = 100;
+    private int coinsAmount = 1;
     [SerializeField] Material playback = null;
     [SerializeField] Material normal = null;
 
@@ -9,11 +9,11 @@ public class CoinsItem : CollectedItem {
     }
 
     protected override void ActivateItem() {
-        myGameManager.ChangeScore(coinsAmount);
+        myGameManager.ChangeCoins(coinsAmount);
     }
 
     protected override void DeactivateItem() {
-        myGameManager.ChangeScore(-coinsAmount);
+        myGameManager.ChangeCoins(-coinsAmount);
     }
 
     protected override void VisualizeOnPlayback() {

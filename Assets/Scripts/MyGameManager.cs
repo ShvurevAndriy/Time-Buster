@@ -14,6 +14,7 @@ public class MyGameManager : MonoBehaviour {
     [SerializeField] Text scoreText = null;
     [SerializeField] Text parachutesText = null;
     [SerializeField] Text plannersText = null;
+    [SerializeField] Text replayCountText = null;
     [SerializeField] Text replayText = null;
     [SerializeField] ProgressBar jetpackFuelBar = null;
     [SerializeField] ProgressBar recordBar = null;
@@ -21,12 +22,14 @@ public class MyGameManager : MonoBehaviour {
     [SerializeField] float jetPackFuel = 0;
     [SerializeField] int parachutes = 0;
     [SerializeField] int planners = 0;
+    [SerializeField] int replays = 10;
 
     public GameMode CurrentGameMode { get; private set; }
     public float JetPackFuel { get => jetPackFuel; set => jetPackFuel = value; }
     public int Parachutes { get => parachutes; set => parachutes = value; }
     public int Planners { get => planners; set => planners = value; }
-    public int Scores { get; private set; } = 0;
+    public int Coins { get; private set; } = 0;
+    public int Replays { get => replays; set => replays = value; }
 
     public delegate void GameModeEvent();
 
@@ -45,9 +48,10 @@ public class MyGameManager : MonoBehaviour {
     }
 
     private void UpdateCounters() {
-        scoreText.text = Scores.ToString();
+        scoreText.text = Coins.ToString();
         parachutesText.text = Parachutes.ToString();
         plannersText.text = Planners.ToString();
+        replayCountText.text = Replays.ToString();
         jetpackFuelBar.BarValue = Mathf.RoundToInt(JetPackFuel / jetpackConfiguration.MaxJetPackFuel * 100f);
     }
 
@@ -99,6 +103,15 @@ public class MyGameManager : MonoBehaviour {
         return JetPackFuel > 0;
     }
 
+    private bool UseReplay() {
+        if (Replays > 0) {
+            Replays--;
+            replayCountText.text = Replays.ToString();
+            return true;
+        }
+        return false;
+    }
+
     public float ChangeJetpackFuel(float diff) {
 
         float tankFreeCapacity = jetpackConfiguration.MaxJetPackFuel - JetPackFuel;
@@ -113,9 +126,9 @@ public class MyGameManager : MonoBehaviour {
         }
     }
 
-    public void ChangeScore(int diff) {
-        Scores = Mathf.Clamp(Scores + diff, 0, int.MaxValue);
-        scoreText.text = Scores.ToString();
+    public void ChangeCoins(int diff) {
+        Coins = Mathf.Clamp(Coins + diff, 0, int.MaxValue);
+        scoreText.text = Coins.ToString();
     }
 
     public void ActualizeGameDataForPlayback(float angel) {
@@ -141,9 +154,14 @@ public class MyGameManager : MonoBehaviour {
             Debug.LogError("Call StartPlaybackMode from incorrect mode");
             return;
         }
-        replayText.enabled = true;
-        CurrentGameMode = GameMode.playback;
-        OnPlaybackModeOn();
+        if (UseReplay()) {
+            replayText.enabled = true;
+            CurrentGameMode = GameMode.playback;
+            OnPlaybackModeOn();
+        } else {
+            gameMenuController.GameOver();
+        }
+
     }
 
     public void StartPlayMode() {

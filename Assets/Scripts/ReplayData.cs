@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class ReplayData {
 
-    public Vector3 posotion;
+    public Vector3 position;
     public float jumpHeight;
     public float currentAngel;
     public float angularSpeed;
@@ -15,13 +16,14 @@ public class ReplayData {
     public float jetpackFuel;
     public int planners;
     public int parachutes;
+    public int replays;
 
     public static Builder builder() {
         return new Builder();
     }
 
     public class Builder {
-        private Vector3 posotion;
+        private Vector3 position;
         private float jumpHeight;
         private float currentAngel;
         private float angularSpeed;
@@ -34,9 +36,10 @@ public class ReplayData {
         private float jetpackFuel;
         private int planners;
         private int parachutes;
+        private int replays;
 
-        public Builder setPosition(Vector3 posotion) {
-            this.posotion = posotion;
+        public Builder setPosition(Vector3 position) {
+            this.position = position;
             return this;
         }
         public Builder setJumpHeight(float jumpHeight) {
@@ -92,9 +95,14 @@ public class ReplayData {
             return this;
         }
 
+        public Builder setReplays(int replays) {
+            this.replays = replays;
+            return this;
+        }
+
         public ReplayData build() {
             ReplayData replayData = new ReplayData();
-            replayData.posotion = posotion;
+            replayData.position = position;
             replayData.yVelocity = yVelocity;
             replayData.jumpHeight = jumpHeight;
             replayData.angularSpeed = angularSpeed;
@@ -107,6 +115,7 @@ public class ReplayData {
             replayData.jetpackFuel = jetpackFuel;
             replayData.parachutes = parachutes;
             replayData.planners = planners;
+            replayData.replays = replays;
             return replayData;
         }
     }

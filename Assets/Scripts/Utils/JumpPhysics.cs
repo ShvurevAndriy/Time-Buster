@@ -2,6 +2,7 @@
 
 public static class JumpPhysics {
     public const float g = 9.8f;
+    public static readonly int layerMask = LayerMask.GetMask("Hazard", "Safe Surface", "Level End");
 
     public static Vector2 CalculateNextJumpVelocities(float heightToJump, float g, float angel) {
         float velocity = HeightToJumpForce(heightToJump, g, angel);
@@ -21,11 +22,13 @@ public static class JumpPhysics {
         return boostHeight < 0 ? 0 : boostHeight;
     }
 
-    public static Vector3 CalculatePositionAtTime(float yVelocity, float currentAngel, float radius, float time, float g, Vector3 startPos) {
+    public static Vector3 CalculatePositionAtTime(float yVelocity, float angularSpeed, ref float startAngel, float radius, float time, float g, Vector3 startPos) {
+        startAngel += angularSpeed * time;
+
         return new Vector3(
-            Mathf.Cos(Mathf.Deg2Rad * currentAngel) * radius,
-            g * time * time * 0.5f + yVelocity * time + startPos.y,
-            Mathf.Sin(Mathf.Deg2Rad * currentAngel) * radius);
+            Mathf.Cos(Mathf.Deg2Rad * startAngel) * radius,
+            - g * time * time * 0.5f + yVelocity * time + startPos.y,
+            Mathf.Sin(Mathf.Deg2Rad * startAngel) * radius);
     }
 
     public static float AngularToLinearVelocity(float angularVelocity, float radius) {
