@@ -48,12 +48,7 @@ public class PlayerMovement : MonoBehaviour {
     public event PlayerOnJumpAction OnPlayerJump = delegate { };
     public event PlayerOnJumpAction OnPlayerForeJump = delegate { };
 
-    private MarkersPool markersPool;
-
-
-
     void Start() {
-        markersPool = FindObjectOfType<MarkersPool>();
 
         velocityBehaviors = new Dictionary<VelocityBehaviorType, VelocityBehavior> {
             { VelocityBehaviorType.regular, new RegularMovementBehavior()},

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -32,7 +33,6 @@ public class MenuController : MonoBehaviour {
 #endif
 
 #if !UNITY_EDITOR
-        scenes.Add("Main Menu");
         scenes.Add("Level 1");
         scenes.Add("Level 2");
         scenes.Add("Level 3");
@@ -41,6 +41,7 @@ public class MenuController : MonoBehaviour {
         scenes.Add("Jetpack level 2");
         scenes.Add("Bonus level");
         scenes.Add("Jetpack bounus level");
+        scenes.Add("Secret level");
 #endif
 
         levels.AddOptions(scenes);
@@ -49,6 +50,12 @@ public class MenuController : MonoBehaviour {
         UpdateCoinsStatsForLevel(levels.value);
         totalCoins = GamePrefController.GetTotalCoinsForLevels(levels.options.Count);
         totalCoinsText.text = totalCoins.ToString();
+
+        if (levelsRequrement != null) {
+            for (int i = 0; i < levelsRequrement.Length; i++) {
+                GamePrefController.SaveLevelRequrement(i + 1, levelsRequrement[i]);
+            }
+        }
     }
 
     public void OnDropDownChange(int option) {
@@ -80,10 +87,7 @@ public class MenuController : MonoBehaviour {
     }
 
     private void UpdateCoinsStatsForLevel(int level) {
-        int neededCoins = 0;
-        if (levelsRequrement != null && level < levelsRequrement.Length) {
-            neededCoins = levelsRequrement[level];
-        }
+        int neededCoins = GamePrefController.LoadLevelRequrement(level + 1);
         neededCoinsText.text = neededCoins.ToString();
         playButton.interactable = neededCoins <= totalCoins;
     }

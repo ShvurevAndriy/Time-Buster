@@ -2873,6 +2873,16 @@ PrefabInstance:
       propertyPath: lockCameraOnPlayer
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2484011404122313182, guid: 92ae5726c82e75f47b2a4c7a563a92bf,
+        type: 3}
+      propertyPath: maxDistance
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 2484011404122313182, guid: 92ae5726c82e75f47b2a4c7a563a92bf,
+        type: 3}
+      propertyPath: minDistance
+      value: 20
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 92ae5726c82e75f47b2a4c7a563a92bf, type: 3}
 --- !u!1 &1425398878

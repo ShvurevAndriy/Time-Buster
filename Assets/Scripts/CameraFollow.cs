@@ -162,10 +162,10 @@ public class CameraFollow : MonoBehaviour {
             jumpPercentage = 1;
         } else {
             if (lockCameraOnPlayer) {
-                jumpPercentage = Mathf.InverseLerp(player.minJumpHeight, player.maxJumpHeight, player.CurrentJumpHeight);
+                return player.CurrentJumpHeight / player.minJumpHeight * minDistance; ;
             } else {
 
-                float deltaY = Mathf.Max(Mathf.Abs(camera.transform.position.y - collidingPoint.y), Mathf.Abs(camera.transform.position.y - player.CurrentJumpHeight)); 
+                float deltaY = Mathf.Max(Mathf.Abs(camera.transform.position.y - collidingPoint.y), Mathf.Abs(camera.transform.position.y - player.CurrentJumpHeight));
                 jumpPercentage = Mathf.InverseLerp(0, maxYDistanceFromCenter, Mathf.Abs(camera.transform.position.y - collidingPoint.y));
             }
         }

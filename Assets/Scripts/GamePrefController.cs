@@ -5,6 +5,7 @@ using UnityEngine;
 
 public static class GamePrefController {
     private const string PREF_COINS = "Coins_";
+    private const string REQ_LEVEL = "Req_level_";
 
     public static int LoadCoinsForLevel(int level) {
         return PlayerPrefs.GetInt(PREF_COINS + level, 0);
@@ -26,5 +27,13 @@ public static class GamePrefController {
 
     public static void SaveCoinsForLevel(int level, int currentCoins) {
         PlayerPrefs.SetInt(PREF_COINS + level, currentCoins);
+    }
+
+    public static void SaveLevelRequrement(int level, int req) {
+        PlayerPrefs.SetInt(REQ_LEVEL + level, req);
+    }
+
+    public static int LoadLevelRequrement(int level) {
+       return PlayerPrefs.GetInt(REQ_LEVEL + level, 0);
     }
 }

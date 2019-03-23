@@ -64,7 +64,11 @@ public class GameMenuController : MonoBehaviour {
     }
 
     public void LoadNextLevel() {
-        int nextSceneIndex = SceneManager.GetActiveScene().buildIndex + 1;
+        int totalCoins = GamePrefController.GetTotalCoinsForLevels(SceneManager.sceneCountInBuildSettings);
+        int nextSceneIndex = SceneManager.GetActiveScene().buildIndex;
+        do {
+            nextSceneIndex++;
+        } while (GamePrefController.LoadLevelRequrement(nextSceneIndex) > totalCoins && nextSceneIndex < SceneManager.sceneCountInBuildSettings);
         if (nextSceneIndex >= SceneManager.sceneCountInBuildSettings) {
             LoadMainMenuScene();
         } else {

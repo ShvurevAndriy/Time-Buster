@@ -28,6 +28,10 @@ public class TrajectoryMarker : MonoBehaviour {
     }
 
     void FixedUpdate() {
+        if (gameManager.CurrentGameMode == GameMode.playback) {
+            return;
+        }
+
         TraceTrajectory();
 
         if (markForceJumpPoint && !putForceJumpMarker && IsReachStartBoostY()) {
