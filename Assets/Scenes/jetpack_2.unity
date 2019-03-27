@@ -4810,7 +4810,7 @@ MonoBehaviour:
   markerColor: {r: 1, g: 0, b: 0, a: 1}
   pathColor: {r: 0, g: 0, b: 0, a: 1}
   markReplayForceJumpPoint: 1
-  frameFactor: 20
+  frameFactor: 1
 --- !u!1 &3008847791175704981
 GameObject:
   m_ObjectHideFlags: 0

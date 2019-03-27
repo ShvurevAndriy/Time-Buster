@@ -541,6 +541,62 @@ PrefabInstance:
       propertyPath: endLevelScoreText
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 5805205778294743382, guid: 4036b73ce4091ab43b72bc1057d3696b,
+        type: 3}
+      propertyPath: m_Delegates.Array.data[0].callback.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5805205778294743382, guid: 4036b73ce4091ab43b72bc1057d3696b,
+        type: 3}
+      propertyPath: m_Delegates.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5805205778294743382, guid: 4036b73ce4091ab43b72bc1057d3696b,
+        type: 3}
+      propertyPath: m_Delegates.Array.data[1].callback.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5805205778294743382, guid: 4036b73ce4091ab43b72bc1057d3696b,
+        type: 3}
+      propertyPath: m_Delegates.Array.data[0].callback.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: SetDownState
+      objectReference: {fileID: 0}
+    - target: {fileID: 5805205778294743382, guid: 4036b73ce4091ab43b72bc1057d3696b,
+        type: 3}
+      propertyPath: m_Delegates.Array.data[1].eventID
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5805205778294743382, guid: 4036b73ce4091ab43b72bc1057d3696b,
+        type: 3}
+      propertyPath: m_Delegates.Array.data[1].callback.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1974069260}
+    - target: {fileID: 5805205778294743382, guid: 4036b73ce4091ab43b72bc1057d3696b,
+        type: 3}
+      propertyPath: m_Delegates.Array.data[1].callback.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: SetUpState
+      objectReference: {fileID: 0}
+    - target: {fileID: 5805205778294743382, guid: 4036b73ce4091ab43b72bc1057d3696b,
+        type: 3}
+      propertyPath: m_Delegates.Array.data[1].callback.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5805205778294743382, guid: 4036b73ce4091ab43b72bc1057d3696b,
+        type: 3}
+      propertyPath: m_Delegates.Array.data[1].callback.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 5805205778294743382, guid: 4036b73ce4091ab43b72bc1057d3696b,
+        type: 3}
+      propertyPath: m_Delegates.Array.data[1].callback.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5805205778294743382, guid: 4036b73ce4091ab43b72bc1057d3696b,
+        type: 3}
+      propertyPath: m_Delegates.Array.data[1].callback.m_TypeName
+      value: UnityEngine.EventSystems.EventTrigger+TriggerEvent, UnityEngine.UI, Version=1.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4036b73ce4091ab43b72bc1057d3696b, type: 3}
 --- !u!1 &169516869 stripped
@@ -3010,6 +3066,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 573da02f9aef95e4b9a27564c7ccf29d, type: 3}
+--- !u!114 &1974069260 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4929582289079811495, guid: 4036b73ce4091ab43b72bc1057d3696b,
+    type: 3}
+  m_PrefabInstance: {fileID: 169516867}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85bf3be603548374ca46f521a3aa7fda, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &1979260943 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1953963846554118292, guid: 57e1466dd0beead42bac7f1c5f3c231c,
@@ -3226,7 +3294,7 @@ MonoBehaviour:
   markerColor: {r: 1, g: 0, b: 0, a: 1}
   pathColor: {r: 0, g: 0, b: 0, a: 1}
   markReplayForceJumpPoint: 1
-  frameFactor: 20
+  frameFactor: 1
 --- !u!1 &3008847791175704981
 GameObject:
   m_ObjectHideFlags: 0

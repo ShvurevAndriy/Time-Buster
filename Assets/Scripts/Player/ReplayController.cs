@@ -61,15 +61,28 @@ public class ReplayController : MonoBehaviour {
     }
 
     private void ProcessUserInput() {
+        int oldFrame = currentFrame;
+        
+#if UNITY_STANDALONE
         currentFrame = Mathf.Clamp(Mathf.RoundToInt(currentFrame + CrossPlatformInputManager.GetAxis("Mouse X") * frameFactor), 0, playbackData.Count - 1);
-        DoPlayBack(currentFrame);
+#endif
+
+#if !UNITY_STANDALONE
+        if (Input.touchCount > 0) {
+            currentFrame = Mathf.Clamp(Mathf.RoundToInt(currentFrame + Input.touches[0].deltaPosition.x * frameFactor), 0, playbackData.Count - 1);
+        }
+#endif
+
+        if (currentFrame != oldFrame) {
+            DoPlayBack(currentFrame);
+        }
 
         if (CrossPlatformInputManager.GetButtonDown("Jump") && activeTurnOffPlaybackMode) {
             gameManger.StartPlayMode();
             activeTurnOffPlaybackMode = false;
         }
 
-        if (CrossPlatformInputManager.GetButtonUp("Jump")){
+        if (CrossPlatformInputManager.GetButtonUp("Jump")) {
             activeTurnOffPlaybackMode = true;
         }
     }
