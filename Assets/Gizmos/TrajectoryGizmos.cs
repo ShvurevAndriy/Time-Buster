@@ -18,7 +18,7 @@ public class TrajectoryGizmos : MonoBehaviour {
                     return;
                 }
             }
-            Vector3 lastPos = new Vector3(Mathf.Cos(0) * player.radius, player.transform.position.y, Mathf.Sin(0) * player.radius);
+            Vector3 lastPos = new Vector3(Mathf.Cos(0) * player.Radius, player.transform.position.y, Mathf.Sin(0) * player.Radius);
             for (float angel = step; angel < 360.0f; angel += step) {
                 Vector3 currentVector = DrawGizmos(lastPos, angel);
                 lastPos = currentVector;
@@ -29,7 +29,7 @@ public class TrajectoryGizmos : MonoBehaviour {
     }
 
     private Vector3 DrawGizmos(Vector3 lastPos, float angel) {
-        Vector3 currentVector = new Vector3(Mathf.Cos(Mathf.Deg2Rad * angel) * player.radius, player.transform.position.y, Mathf.Sin(Mathf.Deg2Rad * angel) * player.radius);
+        Vector3 currentVector = new Vector3(Mathf.Cos(Mathf.Deg2Rad * angel) * player.Radius, player.transform.position.y, Mathf.Sin(Mathf.Deg2Rad * angel) * player.Radius);
         Gizmos.color = circleColor;
         Gizmos.DrawLine(lastPos, currentVector);
         Gizmos.color = lineColor;

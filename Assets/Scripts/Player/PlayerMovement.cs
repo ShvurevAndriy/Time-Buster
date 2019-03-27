@@ -16,14 +16,14 @@ public class PlayerMovement : MonoBehaviour {
 
 
     [Range(45, 89)] public float jumpAngel = 77f;
-    public float minJumpHeight = 5f;
-    public float maxJumpHeight = 50f;
-    public float gravityScale = 4;
-    public float forceJumpTimeScale = 3;
-    public float radius = 40;
-    public float currentAngel = 0;
-    public bool forceByXAxis = false;
-    public float angularForceCoeff = 2f;
+    [SerializeField] float minJumpHeight = 5f;
+    [SerializeField] float maxJumpHeight = 50f;
+    [SerializeField] float gravityScale = 4;
+    [SerializeField] float forceJumpTimeScale = 3;
+    [SerializeField] float radius = 40;
+    [SerializeField] float currentAngel = 0;
+    [SerializeField] bool forceByXAxis = false;
+    [SerializeField] float angularForceCoeff = 2f;
 
     private Rigidbody rigidBody;
     private BoxCollider boxCollider;
@@ -42,6 +42,11 @@ public class PlayerMovement : MonoBehaviour {
     public float YVelocity { get => yVelocity; set => yVelocity = value; }
     public float TimeScale { get; set; } = 1;
     public float AngularSpeed { get => angularSpeed; set => angularSpeed = value; }
+    public float Radius { get => radius; set => radius = value; }
+    public float CurrentAngel { get => currentAngel; set => currentAngel = value; }
+    public float MinJumpHeight { get => minJumpHeight; set => minJumpHeight = value; }
+    public float MaxJumpHeight { get => maxJumpHeight; set => maxJumpHeight = value; }
+    public float GravityScale { get => gravityScale; set => gravityScale = value; }
 
     public delegate void PlayerOnJumpAction();
 
@@ -68,16 +73,16 @@ public class PlayerMovement : MonoBehaviour {
 
     void FixedUpdate() {
         if (gameManager.CurrentGameMode != GameMode.play) {
-            transform.rotation = Quaternion.Euler(0, 90 - currentAngel, 0);
+            transform.rotation = Quaternion.Euler(0, 90 - CurrentAngel, 0);
             return;
         }
 
         float time = Time.deltaTime * TimeScale;
-        float gravity = gravityScale * JumpPhysics.g;
+        float gravity = GravityScale * JumpPhysics.g;
 
         if (forceByXAxis) {
             Vector3 centerCursorPos = Camera.main.ScreenToViewportPoint(Input.mousePosition);
-            AngularSpeed += (Mathf.Clamp01(centerCursorPos.x) - 0.5f) * 2 * JumpPhysics.LinearToAngularVelocity(angularForceCoeff, radius);
+            AngularSpeed += (Mathf.Clamp01(centerCursorPos.x) - 0.5f) * 2 * JumpPhysics.LinearToAngularVelocity(angularForceCoeff, Radius);
         }
 
         transform.position = nextPosition;
@@ -88,7 +93,7 @@ public class PlayerMovement : MonoBehaviour {
             yVelocity,
             AngularSpeed,
             ref currentAngel,
-            radius,
+            Radius,
             time,
             gravity,
             transform.position);
@@ -99,16 +104,16 @@ public class PlayerMovement : MonoBehaviour {
 
         switch (playerStateController.CurrentJumpState) {
             case JumpState.jetpack:
-                velocityBehaviors[VelocityBehaviorType.jetpack].CalculateVelocities(time, gravity, radius, ref yVelocity, ref angularSpeed);
+                velocityBehaviors[VelocityBehaviorType.jetpack].CalculateVelocities(time, gravity, Radius, ref yVelocity, ref angularSpeed);
                 break;
             case JumpState.patachute:
-                velocityBehaviors[VelocityBehaviorType.parachute].CalculateVelocities(time, gravity, radius, ref yVelocity, ref angularSpeed);
+                velocityBehaviors[VelocityBehaviorType.parachute].CalculateVelocities(time, gravity, Radius, ref yVelocity, ref angularSpeed);
                 break;
             case JumpState.deltaplan:
-                velocityBehaviors[VelocityBehaviorType.planner].CalculateVelocities(time, gravity, radius, ref yVelocity, ref angularSpeed);
+                velocityBehaviors[VelocityBehaviorType.planner].CalculateVelocities(time, gravity, Radius, ref yVelocity, ref angularSpeed);
                 break;
             default:
-                velocityBehaviors[VelocityBehaviorType.regular].CalculateVelocities(time, gravity, radius, ref yVelocity, ref angularSpeed);
+                velocityBehaviors[VelocityBehaviorType.regular].CalculateVelocities(time, gravity, Radius, ref yVelocity, ref angularSpeed);
                 break;
         }
 
@@ -119,7 +124,7 @@ public class PlayerMovement : MonoBehaviour {
         if (yVelocity < 0 && Physics.BoxCast(boxCollider.bounds.center, boxCollider.bounds.extents, direction.normalized, out mHit, transform.rotation, direction.magnitude, JumpPhysics.layerMask)) {
             nextPosition = transform.position + (direction.normalized * mHit.distance);
             rigidBody.velocity = new Vector3(0, ((nextPosition - transform.position) * colliderMoveCoef / Time.deltaTime).y, 0);
-            currentAngel = previousAngel;
+            CurrentAngel = previousAngel;
         } else {
             rigidBody.velocity = direction / Time.deltaTime;
         }
@@ -161,7 +166,7 @@ public class PlayerMovement : MonoBehaviour {
     }
 
     public void SetAppropriateRotation() {
-        transform.rotation = Quaternion.Euler(0, 90 - currentAngel, 0);
+        transform.rotation = Quaternion.Euler(0, 90 - CurrentAngel, 0);
     }
 
     public void ForceDownJump() {
@@ -172,7 +177,7 @@ public class PlayerMovement : MonoBehaviour {
     public void TakeStartBoostYPosValue(JumpState currentJumpState) {
         if (currentJumpState == JumpState.slowDown || currentJumpState == JumpState.apex) {
             StartBoostYPos = ApexYPos;
-        } else if (currentJumpState == JumpState.flyDown) {
+        } else {
             StartBoostYPos = transform.position.y;
         }
     }
@@ -186,10 +191,10 @@ public class PlayerMovement : MonoBehaviour {
             forceHeight = JumpPhysics.CalculateBoostJumpHeight(StartBoostYPos, transform.position.y);
         }
 
-        CurrentJumpHeight = JumpPhysics.CalculateNextJumpHeight(forceHeight, minJumpHeight, maxJumpHeight);
-        Vector2 velocities = JumpPhysics.CalculateNextJumpVelocities(CurrentJumpHeight, JumpPhysics.g * gravityScale, jumpAngel);
+        CurrentJumpHeight = JumpPhysics.CalculateNextJumpHeight(forceHeight, MinJumpHeight, MaxJumpHeight);
+        Vector2 velocities = JumpPhysics.CalculateNextJumpVelocities(CurrentJumpHeight, JumpPhysics.g * GravityScale, jumpAngel);
         YVelocity = velocities.y;
-        AngularSpeed = JumpPhysics.LinearToAngularVelocity(velocities.x, radius);
+        AngularSpeed = JumpPhysics.LinearToAngularVelocity(velocities.x, Radius);
         ApexYPos = CurrentJumpHeight + transform.position.y;
         StartBoostYPos = float.NegativeInfinity;
 

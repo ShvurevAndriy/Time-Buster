@@ -22,7 +22,7 @@ public abstract class CollectedItem : MonoBehaviour {
 
     private void OnTriggerEnter(Collider other) {
         if (!activated) {
-            AngelWhenCollected = playerMovement.currentAngel;
+            AngelWhenCollected = playerMovement.CurrentAngel;
             ActivateItem();
             activated = true;
             myGameManager.AddCollectedItem(this);

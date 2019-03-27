@@ -16,6 +16,7 @@ public class MyGameManager : MonoBehaviour {
     [SerializeField] Text plannersText = null;
     [SerializeField] Text replayCountText = null;
     [SerializeField] Text replayText = null;
+    [SerializeField] Button replayButton = null;
     [SerializeField] ProgressBar jetpackFuelBar = null;
     [SerializeField] ProgressBar recordBar = null;
 
@@ -45,6 +46,9 @@ public class MyGameManager : MonoBehaviour {
         jetpackConfiguration = GetComponent<JetpackConfiguration>();
         gameMenuController = GetComponent<GameMenuController>();
         UpdateCounters();
+        if (Replays <= 0) {
+            replayButton.interactable = false;
+        }
     }
 
     private void UpdateCounters() {
@@ -155,6 +159,7 @@ public class MyGameManager : MonoBehaviour {
             return;
         }
         if (UseReplay()) {
+            replayButton.interactable = false;
             replayText.enabled = true;
             CurrentGameMode = GameMode.playback;
             OnPlaybackModeOn();
@@ -169,6 +174,9 @@ public class MyGameManager : MonoBehaviour {
             Debug.LogError("Call StartPlayMode from incorrect mode");
             return;
         }
+        if (Replays > 0) {
+            replayButton.interactable = true;
+        }
         replayText.enabled = false;
         CurrentGameMode = GameMode.play;
         OnPlayModeOn();
@@ -176,5 +184,11 @@ public class MyGameManager : MonoBehaviour {
 
     public void LevelFinished() {
         gameMenuController.ShowLevelFinishedPanel();
+    }
+
+    public void ActivatePlayback() {
+        if (replayButton.IsInteractable()) {
+            StartPlaybackMode();
+        }
     }
 }

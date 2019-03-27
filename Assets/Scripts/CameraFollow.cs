@@ -78,9 +78,9 @@ public class CameraFollow : MonoBehaviour {
         if (!lockCameraOnPlayer) {
             positionFinder.PredictTuchPoint(player.YVelocity,
                 player.AngularSpeed,
-                player.currentAngel,
-                player.radius,
-                player.gravityScale * JumpPhysics.g,
+                player.CurrentAngel,
+                player.Radius,
+                player.GravityScale * JumpPhysics.g,
                 JumpPhysics.layerMask,
                 player.transform.position,
                 out collidingPoint,
@@ -90,7 +90,7 @@ public class CameraFollow : MonoBehaviour {
 
     void LateUpdate() {
 
-        radius = player.radius + distanceToTarget;
+        radius = player.Radius + distanceToTarget;
         float cameraYPos;
         Vector3 lookAtPos;
 
@@ -106,9 +106,9 @@ public class CameraFollow : MonoBehaviour {
         }
 
         transform.position = new Vector3(
-            Mathf.Cos(Mathf.Deg2Rad * player.currentAngel) * (radius + CameraSize),
+            Mathf.Cos(Mathf.Deg2Rad * player.CurrentAngel) * (radius + CameraSize),
             cameraYPos,
-            Mathf.Sin(Mathf.Deg2Rad * player.currentAngel) * (radius + CameraSize));
+            Mathf.Sin(Mathf.Deg2Rad * player.CurrentAngel) * (radius + CameraSize));
 
         transform.LookAt(lookAtPos);
 
@@ -162,7 +162,7 @@ public class CameraFollow : MonoBehaviour {
             jumpPercentage = 1;
         } else {
             if (lockCameraOnPlayer) {
-                return player.CurrentJumpHeight / player.minJumpHeight * minDistance; ;
+                return player.CurrentJumpHeight / player.MinJumpHeight * minDistance; ;
             } else {
 
                 float deltaY = Mathf.Max(Mathf.Abs(camera.transform.position.y - collidingPoint.y), Mathf.Abs(camera.transform.position.y - player.CurrentJumpHeight));

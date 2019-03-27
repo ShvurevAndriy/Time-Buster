@@ -186,7 +186,11 @@ public class PlayerStateController : MonoBehaviour {
         if (CurrentJumpState == JumpState.force) {
             animator.SetTrigger("Force Jump");
         } else if (CurrentJumpState == JumpState.jetpack) {
-            animator.SetTrigger("JetPack");
+            if (CrossPlatformInputManager.GetButton("Fire1")) { 
+                animator.SetTrigger("JetPack");
+            } else {
+                TurneOffJetpack();
+            }
         } else if (CurrentJumpState == JumpState.patachute) {
             animator.SetTrigger("Parachute");
         } else if (CurrentJumpState == JumpState.deltaplan) {

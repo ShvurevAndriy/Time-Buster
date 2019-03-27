@@ -12,10 +12,10 @@ public class EditorModePosition : MonoBehaviour {
                 player = GetComponent<PlayerMovement>();
             }
             Vector2 position2d = new Vector2(player.transform.position.x, player.transform.position.z);
-            player.radius = position2d.magnitude;
-            player.currentAngel = Mathf.Acos(position2d.normalized.x) * Mathf.Rad2Deg;
+            player.Radius = position2d.magnitude;
+            player.CurrentAngel = Mathf.Acos(position2d.normalized.x) * Mathf.Rad2Deg;
             if (position2d.normalized.y < 0) {
-                player.currentAngel = 360 - player.currentAngel;
+                player.CurrentAngel = 360 - player.CurrentAngel;
             }
         }
     }

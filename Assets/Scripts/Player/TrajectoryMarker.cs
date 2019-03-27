@@ -36,11 +36,11 @@ public class TrajectoryMarker : MonoBehaviour {
 
         if (markForceJumpPoint && !putForceJumpMarker && IsReachStartBoostY()) {
             Vector3 markerPos = transform.position;
-            ForceJumpMarkers.Add(playerMovement.currentAngel, DrawSphere(markerPos, forceMarkerScale, forceMarkerColor));
+            ForceJumpMarkers.Add(playerMovement.CurrentAngel, DrawSphere(markerPos, forceMarkerScale, forceMarkerColor));
             putForceJumpMarker = true;
         }
 
-        ForceJumpMarkers.Keys.Where(k => k < playerMovement.currentAngel - angelToDeletForceMarker).ToList()
+        ForceJumpMarkers.Keys.Where(k => k < playerMovement.CurrentAngel - angelToDeletForceMarker).ToList()
             .ForEach(k => {
                 ForceJumpMarkers[k].DestroyNow();
                 ForceJumpMarkers.Remove(k);

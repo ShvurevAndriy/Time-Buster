@@ -26,6 +26,7 @@ public class ReplayController : MonoBehaviour {
     private Dictionary<float, MarkerObject> forceMarkers = new Dictionary<float, MarkerObject>();
     private Dictionary<float, MarkerObject> forceMarkersToDelete = new Dictionary<float, MarkerObject>();
     private List<MarkerObject> path = new List<MarkerObject>();
+    private bool activeTurnOffPlaybackMode = false;
 
     private int currentFrame;
 
@@ -63,12 +64,18 @@ public class ReplayController : MonoBehaviour {
         currentFrame = Mathf.Clamp(Mathf.RoundToInt(currentFrame + CrossPlatformInputManager.GetAxis("Mouse X") * frameFactor), 0, playbackData.Count - 1);
         DoPlayBack(currentFrame);
 
-        if (CrossPlatformInputManager.GetButtonDown("Jump")) {
+        if (CrossPlatformInputManager.GetButtonDown("Jump") && activeTurnOffPlaybackMode) {
             gameManger.StartPlayMode();
+            activeTurnOffPlaybackMode = false;
+        }
+
+        if (CrossPlatformInputManager.GetButtonUp("Jump")){
+            activeTurnOffPlaybackMode = true;
         }
     }
 
     private void OnPlaybackModeOn() {
+        activeTurnOffPlaybackMode = !CrossPlatformInputManager.GetButtonDown("Jump");
         rigidBody.detectCollisions = false;
         rigidBody.collisionDetectionMode = CollisionDetectionMode.Discrete;
         rigidBody.isKinematic = true;
@@ -103,8 +110,8 @@ public class ReplayController : MonoBehaviour {
         positionRecord = new Queue<ReplayData>(playbackData.GetRange(0, currentFrame));
         path.ForEach(m => m.DestroyNow());
         path.Clear();
-        gameManger.DeactivateCollectedItemsAfterAngel(playerMovement.currentAngel);
-        forceMarkers.Keys.Where(k => k > playerMovement.currentAngel).ToList()
+        gameManger.DeactivateCollectedItemsAfterAngel(playerMovement.CurrentAngel);
+        forceMarkers.Keys.Where(k => k > playerMovement.CurrentAngel).ToList()
             .ForEach(k => {
                 MarkerObject markerObject = forceMarkers[k];
                 forceMarkersToDelete.Add(k, markerObject);
@@ -129,7 +136,7 @@ public class ReplayController : MonoBehaviour {
             .setPosition(transform.position)
             .setYVelocity(playerMovement.YVelocity)
             .setTimeScale(playerMovement.TimeScale)
-            .setCurrentAngel(playerMovement.currentAngel)
+            .setCurrentAngel(playerMovement.CurrentAngel)
             .setAngularSpeed(playerMovement.AngularSpeed)
             .setJumpHeight(playerMovement.CurrentJumpHeight)
             .setJumpState(stateController.CurrentJumpState)
@@ -161,7 +168,7 @@ public class ReplayController : MonoBehaviour {
         currentReplayData = playbackData[frame];
         transform.position = currentReplayData.position;
         cameraController.CameraSize = currentReplayData.cameraZoom;
-        playerMovement.currentAngel = currentReplayData.currentAngel;
+        playerMovement.CurrentAngel = currentReplayData.currentAngel;
         gameManger.JetPackFuel = currentReplayData.jetpackFuel;
         gameManger.Parachutes = currentReplayData.parachutes;
         gameManger.Planners = currentReplayData.planners;
