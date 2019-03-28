@@ -14,7 +14,6 @@ public class PlayerMovement : MonoBehaviour {
     private const float collederEpsilon = 0.05f;
     private const float colliderMoveCoef = 1.0001f;
 
-
     [Range(45, 89)] public float jumpAngel = 77f;
     [SerializeField] float minJumpHeight = 5f;
     [SerializeField] float maxJumpHeight = 50f;
@@ -174,8 +173,8 @@ public class PlayerMovement : MonoBehaviour {
         OnPlayerForeJump();
     }
 
-    public void TakeStartBoostYPosValue(JumpState currentJumpState) {
-        if (currentJumpState == JumpState.slowDown || currentJumpState == JumpState.apex) {
+    public void TakeStartBoostYPosValue(bool apexWasReached) {
+        if (!apexWasReached && (playerStateController.CurrentJumpState == JumpState.slowDown || playerStateController.CurrentJumpState == JumpState.apex)) {
             StartBoostYPos = ApexYPos;
         } else {
             StartBoostYPos = transform.position.y;

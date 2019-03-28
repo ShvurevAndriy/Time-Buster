@@ -25,6 +25,7 @@ public class PlayerStateController : MonoBehaviour {
 
     private bool forceTrigger;
     private bool needSkipFirstAfterPlayback = false;
+    private bool apexWasReached;
 
     public JumpState CurrentJumpState { get; set; }
 
@@ -99,6 +100,7 @@ public class PlayerStateController : MonoBehaviour {
 
     public void OnFlyDownAnimation() {
         if (CurrentJumpState != JumpState.flyDown) {
+            apexWasReached = true;
             ChanegeJumpState(JumpState.flyDown);
         }
     }
@@ -111,7 +113,6 @@ public class PlayerStateController : MonoBehaviour {
     }
 
     private void ProcessUserInput() {
-
         if (CrossPlatformInputManager.GetButtonDown("Jump")) {
             if (needSkipFirstAfterPlayback) {
                 needSkipFirstAfterPlayback = false;
@@ -199,6 +200,7 @@ public class PlayerStateController : MonoBehaviour {
     }
 
     private void OnJump() {
+        apexWasReached = false;
         forceTrigger = false;
         animator.ResetTrigger("Force Jump");
         animator.ResetTrigger("JetPack");
@@ -230,7 +232,7 @@ public class PlayerStateController : MonoBehaviour {
         if (CurrentJumpState == JumpState.slowDown || CurrentJumpState == JumpState.apex || CurrentJumpState == JumpState.flyDown) {
             animator.SetTrigger("Force Jump");
             if (!forceTrigger) {
-                playerMovement.TakeStartBoostYPosValue(CurrentJumpState);
+                playerMovement.TakeStartBoostYPosValue(apexWasReached);
                 forceTrigger = true;
             }
         }
