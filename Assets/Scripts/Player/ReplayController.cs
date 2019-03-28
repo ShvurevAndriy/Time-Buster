@@ -62,12 +62,12 @@ public class ReplayController : MonoBehaviour {
 
     private void ProcessUserInput() {
         int oldFrame = currentFrame;
-        
-#if UNITY_STANDALONE
+
+#if !(UNITY_IOS || UNITY_ANDROID)
         currentFrame = Mathf.Clamp(Mathf.RoundToInt(currentFrame + CrossPlatformInputManager.GetAxis("Mouse X") * frameFactor), 0, playbackData.Count - 1);
 #endif
 
-#if !UNITY_STANDALONE
+#if (UNITY_IOS || UNITY_ANDROID)
         if (Input.touchCount > 0) {
             currentFrame = Mathf.Clamp(Mathf.RoundToInt(currentFrame + Input.touches[0].deltaPosition.x * frameFactor), 0, playbackData.Count - 1);
         }
