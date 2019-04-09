@@ -7,7 +7,6 @@ public class TrajectoryMarker : MonoBehaviour {
     public float traceMarkerRadius = 0.2f;
     public float traceTime = 3f;
     public bool markForceJumpPoint = true;
-    public bool putForceJumpMarker;
     public Color forceMarkerColor = Color.grey;
     public float forceMarkerScale = 1;
     public float angelToDeletForceMarker = 180;
@@ -18,6 +17,7 @@ public class TrajectoryMarker : MonoBehaviour {
     private PlayerMovement playerMovement;
 
     public Dictionary<float, MarkerObject> ForceJumpMarkers { get; set; } = new Dictionary<float, MarkerObject>();
+    public bool PutForceJumpMarker { get; set; }
 
     void Start() {
         gameManager = FindObjectOfType<MyGameManager>();
@@ -34,10 +34,10 @@ public class TrajectoryMarker : MonoBehaviour {
 
         TraceTrajectory();
 
-        if (markForceJumpPoint && !putForceJumpMarker && IsReachStartBoostY()) {
+        if (markForceJumpPoint && !PutForceJumpMarker && IsReachStartBoostY()) {
             Vector3 markerPos = transform.position;
             ForceJumpMarkers.Add(playerMovement.CurrentAngel, DrawSphere(markerPos, forceMarkerScale, forceMarkerColor));
-            putForceJumpMarker = true;
+            PutForceJumpMarker = true;
         }
 
         ForceJumpMarkers.Keys.Where(k => k < playerMovement.CurrentAngel - angelToDeletForceMarker).ToList()
@@ -55,7 +55,7 @@ public class TrajectoryMarker : MonoBehaviour {
     }
 
     private void OnJump() {
-        putForceJumpMarker = false;
+        PutForceJumpMarker = false;
     }
 
     private bool IsReachStartBoostY() {

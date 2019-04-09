@@ -24,7 +24,6 @@ public class PlayerStateController : MonoBehaviour {
     private Animator animator;
 
     private bool forceTrigger;
-    private bool needSkipFirstAfterPlayback = false;
     private bool apexWasReached;
 
     public JumpState CurrentJumpState { get; set; }
@@ -52,10 +51,6 @@ public class PlayerStateController : MonoBehaviour {
     void Update() {
         if (gameManager.CurrentGameMode != GameMode.play) {
             return;
-        }
-
-        if (CrossPlatformInputManager.GetButtonUp("Jump")) {
-            needSkipFirstAfterPlayback = false;
         }
 
         switch (CurrentJumpState) {
@@ -114,11 +109,7 @@ public class PlayerStateController : MonoBehaviour {
 
     private void ProcessUserInput() {
         if (CrossPlatformInputManager.GetButtonDown("Jump")) {
-            if (needSkipFirstAfterPlayback) {
-                needSkipFirstAfterPlayback = false;
-            } else {
-                SetForceDownJumpTrigger();
-            }
+            SetForceDownJumpTrigger();
         }
         ProcessUserJetpackInput();
     }
@@ -133,12 +124,12 @@ public class PlayerStateController : MonoBehaviour {
     }
 
     private void ProcessUserJetpackInput() {
-        if (CrossPlatformInputManager.GetButtonDown("Fire1") && gameManager.HasFuel()) {
+        if (CrossPlatformInputManager.GetButtonDown("Jetpack") && gameManager.HasFuel()) {
             if (!forceTrigger) {
                 animator.SetTrigger("JetPack");
                 ChanegeJumpState(JumpState.jetpack);
             }
-        } else if (CrossPlatformInputManager.GetButtonUp("Fire1") && CurrentJumpState == JumpState.jetpack) {
+        } else if (CrossPlatformInputManager.GetButtonUp("Jetpack") && CurrentJumpState == JumpState.jetpack) {
             TurneOffJetpack();
         }
     }
@@ -181,17 +172,19 @@ public class PlayerStateController : MonoBehaviour {
     }
 
     private void OnPlayModeOn() {
-        needSkipFirstAfterPlayback = true;
         animator.ResetTrigger("Play Back");
         ChanegeJumpState(CurrentJumpState);
         if (CurrentJumpState == JumpState.force) {
             animator.SetTrigger("Force Jump");
         } else if (CurrentJumpState == JumpState.jetpack) {
-            if (CrossPlatformInputManager.GetButton("Fire1")) { 
+            if (CrossPlatformInputManager.GetButton("Jetpack")) {
                 animator.SetTrigger("JetPack");
             } else {
                 TurneOffJetpack();
             }
+        } else if (CrossPlatformInputManager.GetButton("Jetpack")) {
+            ChanegeJumpState(JumpState.jetpack);
+            animator.SetTrigger("JetPack");
         } else if (CurrentJumpState == JumpState.patachute) {
             animator.SetTrigger("Parachute");
         } else if (CurrentJumpState == JumpState.deltaplan) {

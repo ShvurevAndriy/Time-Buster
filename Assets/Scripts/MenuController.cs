@@ -33,15 +33,18 @@ public class MenuController : MonoBehaviour {
 #endif
 
 #if !UNITY_EDITOR
-        scenes.Add("Level 1");
-        scenes.Add("Level 2");
-        scenes.Add("Level 3");
+        scenes.Add("Level 1 Training");
+        scenes.Add("Level 2 Training");
+        scenes.Add("Level 3 Training");
         scenes.Add("Level 4");
-        scenes.Add("Jetpack level 1");
-        scenes.Add("Jetpack level 2");
-        scenes.Add("Bonus level");
-        scenes.Add("Jetpack bounus level");
-        scenes.Add("Secret level");
+        scenes.Add("Level 5");
+        scenes.Add("Level 6");
+        scenes.Add("Level 7  jetpack_0");
+        scenes.Add("Level 8");
+        scenes.Add("Level 9 jetpack");
+        scenes.Add("Level 10  jetpack");
+        scenes.Add("Level 11  jetpack");
+        scenes.Add("level 12");
 #endif
 
         levels.AddOptions(scenes);

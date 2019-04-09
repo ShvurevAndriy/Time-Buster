@@ -17,6 +17,7 @@ public class ReplayData {
     public int planners;
     public int parachutes;
     public int replays;
+    public bool putForceMarker;
 
     public static Builder builder() {
         return new Builder();
@@ -37,6 +38,7 @@ public class ReplayData {
         private int planners;
         private int parachutes;
         private int replays;
+        private bool putForceMarker;
 
         public Builder setPosition(Vector3 position) {
             this.position = position;
@@ -100,6 +102,11 @@ public class ReplayData {
             return this;
         }
 
+        public Builder setPutForceMarker(bool putForceMarker) {
+            this.putForceMarker = putForceMarker;
+            return this;
+        }
+
         public ReplayData build() {
             ReplayData replayData = new ReplayData();
             replayData.position = position;
@@ -116,6 +123,7 @@ public class ReplayData {
             replayData.parachutes = parachutes;
             replayData.planners = planners;
             replayData.replays = replays;
+            replayData.putForceMarker = putForceMarker;
             return replayData;
         }
     }

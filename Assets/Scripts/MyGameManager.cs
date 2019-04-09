@@ -11,14 +11,12 @@ public enum GameMode {
 
 public class MyGameManager : MonoBehaviour {
 
-    [SerializeField] Text scoreText = null;
-    [SerializeField] Text parachutesText = null;
-    [SerializeField] Text plannersText = null;
-    [SerializeField] Text replayCountText = null;
+    [SerializeField] Image[] coinsImages = new Image[3];
+    [SerializeField] Image[] rewindsImages = new Image[20];
+    [SerializeField] Image fuelForegroundImage = null;
+
     [SerializeField] Text replayText = null;
     [SerializeField] Button replayButton = null;
-    [SerializeField] ProgressBar jetpackFuelBar = null;
-    [SerializeField] ProgressBar recordBar = null;
 
     [SerializeField] float jetPackFuel = 0;
     [SerializeField] int parachutes = 0;
@@ -52,11 +50,23 @@ public class MyGameManager : MonoBehaviour {
     }
 
     private void UpdateCounters() {
-        scoreText.text = Coins.ToString();
-        parachutesText.text = Parachutes.ToString();
-        plannersText.text = Planners.ToString();
-        replayCountText.text = Replays.ToString();
-        jetpackFuelBar.BarValue = Mathf.RoundToInt(JetPackFuel / jetpackConfiguration.MaxJetPackFuel * 100f);
+        UpdateCoinsIndicator();
+
+        UpdateRewindsIndicator();
+
+        fuelForegroundImage.transform.localScale = new Vector3(1, JetPackFuel / jetpackConfiguration.MaxJetPackFuel, 1);
+    }
+
+    private void UpdateRewindsIndicator() {
+        for (int i = 0; i < rewindsImages.Length; i++) {
+            rewindsImages[i].enabled = i < Replays;
+        }
+    }
+
+    private void UpdateCoinsIndicator() {
+        for (int i = 0; i < coinsImages.Length; i++) {
+            coinsImages[i].color = i < Coins ? Color.yellow : Color.grey;
+        }
     }
 
     public void AddCollectedItem(CollectedItem item) {
@@ -65,20 +75,14 @@ public class MyGameManager : MonoBehaviour {
 
     public void ChangeParachutes(int diff) {
         Parachutes = Mathf.Clamp(diff, 0, int.MaxValue);
-        parachutesText.text = Parachutes.ToString();
     }
 
     public bool UseParachute() {
         if (Parachutes > 0) {
             Parachutes--;
-            parachutesText.text = Parachutes.ToString();
             return true;
         }
         return false; ;
-    }
-
-    public void SetRecordRatio(float percentage) {
-        recordBar.BarValue = Mathf.RoundToInt(percentage * 100f);
     }
 
     public bool HasParachute() {
@@ -87,13 +91,11 @@ public class MyGameManager : MonoBehaviour {
 
     public void ChangePlanners(int diff) {
         Planners = Mathf.Clamp(diff, 0, int.MaxValue);
-        plannersText.text = Planners.ToString();
     }
 
     public bool UsePlanner() {
         if (Planners > 0) {
             Planners--;
-            plannersText.text = Planners.ToString();
             return true;
         }
         return false; ;
@@ -110,7 +112,7 @@ public class MyGameManager : MonoBehaviour {
     private bool UseReplay() {
         if (Replays > 0) {
             Replays--;
-            replayCountText.text = Replays.ToString();
+            UpdateRewindsIndicator();
             return true;
         }
         return false;
@@ -121,7 +123,7 @@ public class MyGameManager : MonoBehaviour {
         float tankFreeCapacity = jetpackConfiguration.MaxJetPackFuel - JetPackFuel;
 
         JetPackFuel = Mathf.Clamp(JetPackFuel + diff, 0, jetpackConfiguration.MaxJetPackFuel);
-        jetpackFuelBar.BarValue = Mathf.RoundToInt(JetPackFuel / jetpackConfiguration.MaxJetPackFuel * 100f);
+        fuelForegroundImage.transform.localScale = new Vector3(1, JetPackFuel / jetpackConfiguration.MaxJetPackFuel, 1);
 
         if (diff < 0) {
             return JetPackFuel < Mathf.Abs(diff) ? JetPackFuel : diff;
@@ -132,7 +134,7 @@ public class MyGameManager : MonoBehaviour {
 
     public void ChangeCoins(int diff) {
         Coins = Mathf.Clamp(Coins + diff, 0, int.MaxValue);
-        scoreText.text = Coins.ToString();
+        UpdateCoinsIndicator();
     }
 
     public void ActualizeGameDataForPlayback(float angel) {

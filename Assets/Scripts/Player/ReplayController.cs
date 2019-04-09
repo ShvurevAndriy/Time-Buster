@@ -49,14 +49,12 @@ public class ReplayController : MonoBehaviour {
     void FixedUpdate() {
         if (gameManger.CurrentGameMode == GameMode.play) {
             DoRecord();
-            gameManger.SetRecordRatio((float)positionRecord.Count / replaySize);
         }
     }
 
     void Update() {
         if (gameManger.CurrentGameMode == GameMode.playback) {
             ProcessUserInput();
-            gameManger.SetRecordRatio((float)currentFrame / replaySize);
         }
     }
 
@@ -77,12 +75,12 @@ public class ReplayController : MonoBehaviour {
             DoPlayBack(currentFrame);
         }
 
-        if (CrossPlatformInputManager.GetButtonDown("Jump") && activeTurnOffPlaybackMode) {
+        if (CrossPlatformInputManager.GetButtonDown("Jump") && activeTurnOffPlaybackMode || CrossPlatformInputManager.GetButtonDown("Jetpack")) {
             gameManger.StartPlayMode();
             activeTurnOffPlaybackMode = false;
         }
 
-        if (CrossPlatformInputManager.GetButtonUp("Jump")){
+        if (CrossPlatformInputManager.GetButtonUp("Jump")) {
             activeTurnOffPlaybackMode = true;
         }
     }
@@ -159,6 +157,7 @@ public class ReplayController : MonoBehaviour {
             .setJetpackFuel(gameManger.JetPackFuel)
             .setParachutes(gameManger.Parachutes)
             .setPlanners(gameManger.Planners)
+            .setPutForceMarker(trajectoryMarker.PutForceJumpMarker)
             .build();
         positionRecord.Enqueue(replayData);
         if (positionRecord.Count > replaySize) {
@@ -194,5 +193,6 @@ public class ReplayController : MonoBehaviour {
         playerMovement.YVelocity = currentReplayData.yVelocity;
         playerMovement.TimeScale = currentReplayData.timeScale;
         playerMovement.AngularSpeed = currentReplayData.angularSpeed;
+        trajectoryMarker.PutForceJumpMarker = currentReplayData.putForceMarker;
     }
 }

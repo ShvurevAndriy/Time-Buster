@@ -120,9 +120,10 @@ public class PlayerMovement : MonoBehaviour {
 
         Vector3 direction = nextPosition - transform.position;
 
-        if (yVelocity < 0 && Physics.BoxCast(boxCollider.bounds.center, boxCollider.bounds.extents, direction.normalized, out mHit, transform.rotation, direction.magnitude, JumpPhysics.layerMask)) {
+        if (yVelocity < 0 && Physics.BoxCast(boxCollider.bounds.center, boxCollider.bounds.extents, direction.normalized, out mHit, Quaternion.Euler(transform.rotation.eulerAngles.x, 90 + transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z), direction.magnitude, JumpPhysics.layerMask)) {
             nextPosition = transform.position + (direction.normalized * mHit.distance);
             rigidBody.velocity = new Vector3(0, ((nextPosition - transform.position) * colliderMoveCoef / Time.deltaTime).y, 0);
+
             CurrentAngel = previousAngel;
         } else {
             rigidBody.velocity = direction / Time.deltaTime;

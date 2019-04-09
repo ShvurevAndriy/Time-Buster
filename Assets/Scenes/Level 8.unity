@@ -3821,7 +3821,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ab3acb4790c22740985ea0b77ff7916, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  replaySize: 600
+  replaySize: 900
   pathMarkerScale: 0.2
   markerColor: {r: 1, g: 0, b: 0, a: 1}
   pathColor: {r: 0, g: 0, b: 0, a: 1}

@@ -515,20 +515,20 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5668794104452906471, guid: 4036b73ce4091ab43b72bc1057d3696b,
-        type: 3}
-      propertyPath: recordBar
-      value: 
-      objectReference: {fileID: 1596977356}
-    - target: {fileID: 5668794104452906471, guid: 4036b73ce4091ab43b72bc1057d3696b,
-        type: 3}
-      propertyPath: replays
-      value: 20
-      objectReference: {fileID: 0}
     - target: {fileID: 4494973762963890719, guid: 4036b73ce4091ab43b72bc1057d3696b,
         type: 3}
       propertyPath: m_AnchoredPosition.x
       value: 0.00024414062
+      objectReference: {fileID: 0}
+    - target: {fileID: 5668794104452906471, guid: 4036b73ce4091ab43b72bc1057d3696b,
+        type: 3}
+      propertyPath: recordBar
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 5668794104452906471, guid: 4036b73ce4091ab43b72bc1057d3696b,
+        type: 3}
+      propertyPath: replays
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 2212683808168347093, guid: 4036b73ce4091ab43b72bc1057d3696b,
         type: 3}
@@ -1577,18 +1577,6 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1420195397}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1596977356 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3430643639845589797, guid: 4036b73ce4091ab43b72bc1057d3696b,
-    type: 3}
-  m_PrefabInstance: {fileID: 169516867}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 149d864443ddca94ba93b092e7acd5ea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &1656734277
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1656,15 +1644,20 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2484011404122313183, guid: 92ae5726c82e75f47b2a4c7a563a92bf,
-        type: 3}
-      propertyPath: maxPredictionYDelta
-      value: 200
-      objectReference: {fileID: 0}
     - target: {fileID: 2484011404122313182, guid: 92ae5726c82e75f47b2a4c7a563a92bf,
         type: 3}
       propertyPath: minDistance
       value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2484011404122313182, guid: 92ae5726c82e75f47b2a4c7a563a92bf,
+        type: 3}
+      propertyPath: maxDistance
+      value: 70
+      objectReference: {fileID: 0}
+    - target: {fileID: 2484011404122313183, guid: 92ae5726c82e75f47b2a4c7a563a92bf,
+        type: 3}
+      propertyPath: maxPredictionYDelta
+      value: 200
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 92ae5726c82e75f47b2a4c7a563a92bf, type: 3}
@@ -2058,7 +2051,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ab3acb4790c22740985ea0b77ff7916, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  replaySize: 600
+  replaySize: 900
   pathMarkerScale: 0.2
   markerColor: {r: 1, g: 0, b: 0, a: 1}
   pathColor: {r: 0, g: 0, b: 0, a: 1}
