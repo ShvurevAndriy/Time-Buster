@@ -1822,7 +1822,7 @@ PrefabInstance:
     - target: {fileID: 3794814644776946745, guid: 36f76d1f5506adb4b96866936f9b7452,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 8.7
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3794814644776946745, guid: 36f76d1f5506adb4b96866936f9b7452,
         type: 3}
@@ -3580,6 +3580,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3126323868145467511, guid: 57e1466dd0beead42bac7f1c5f3c231c,
+        type: 3}
+      propertyPath: fuelAmount
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 57e1466dd0beead42bac7f1c5f3c231c, type: 3}
 --- !u!1001 &1665073228
@@ -4711,8 +4716,8 @@ MonoBehaviour:
   maxJumpHeight: 200
   gravityScale: 3
   forceJumpTimeScale: 3
-  radius: 150.57007
-  currentAngel: 355.01263
+  radius: 150.84886
+  currentAngel: 357.4543
   forceByXAxis: 0
   angularForceCoeff: 0.05
 --- !u!1 &3008847790097097351
@@ -4765,8 +4770,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3008847790097097351}
-  m_LocalRotation: {x: -0, y: -0.7372029, z: -0, w: -0.6756714}
-  m_LocalPosition: {x: 150, y: 7.799999, z: -13.09}
+  m_LocalRotation: {x: 0, y: -0.7226396, z: 0, w: -0.691225}
+  m_LocalPosition: {x: 150.7, y: 7.799999, z: -6.7}
   m_LocalScale: {x: 0.6646294, y: 1, z: 1}
   m_Children:
   - {fileID: 3008847791175704982}
