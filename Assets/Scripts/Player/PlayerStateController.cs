@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityStandardAssets.CrossPlatformInput;
 
 public enum JumpState {
+    landing = -1,
     flyUp = 0,
     slowDown = 1,
     apex = 2,
@@ -18,7 +19,6 @@ public class PlayerStateController : MonoBehaviour {
     public float minVelocityForSlowDown = 7;
 
     private MyGameManager gameManager;
-    private ReplayController replayController;
     private PlayerMovement playerMovement;
     private JetpackConfiguration jetpackConfiguration;
     private Animator animator;
@@ -42,8 +42,7 @@ public class PlayerStateController : MonoBehaviour {
 
         playerMovement = GetComponent<PlayerMovement>();
         playerMovement.OnPlayerJump += OnJump;
-
-        replayController = GetComponent<ReplayController>();
+        playerMovement.OnPlayerLanding += OnLanding;
 
         CurrentJumpState = JumpState.flyDown;
     }
@@ -192,7 +191,7 @@ public class PlayerStateController : MonoBehaviour {
         }
     }
 
-    private void OnJump() {
+    private void OnLanding() {
         apexWasReached = false;
         forceTrigger = false;
         animator.ResetTrigger("Force Jump");
@@ -200,6 +199,11 @@ public class PlayerStateController : MonoBehaviour {
         animator.ResetTrigger("Parachute");
         animator.ResetTrigger("Deltaplan");
         animator.SetTrigger("New Jump");
+        ChanegeJumpState(JumpState.landing);
+    }
+
+    private void OnJump() {
+        Debug.Log("dddddrtfrftvttvt");
         ChanegeJumpState(JumpState.flyUp);
     }
 

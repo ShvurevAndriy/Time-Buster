@@ -34,6 +34,7 @@ public class PlayerMovement : MonoBehaviour {
 
     private Dictionary<VelocityBehaviorType, VelocityBehavior> velocityBehaviors;
     private Vector3 nextPosition;
+    private bool isLanding;
 
     public float StartBoostYPos { get; set; }
     public float ApexYPos { get; set; }
@@ -50,6 +51,7 @@ public class PlayerMovement : MonoBehaviour {
     public delegate void PlayerOnJumpAction();
 
     public event PlayerOnJumpAction OnPlayerJump = delegate { };
+    public event PlayerOnJumpAction OnPlayerLanding = delegate { };
     public event PlayerOnJumpAction OnPlayerForeJump = delegate { };
 
     void Start() {
@@ -71,6 +73,10 @@ public class PlayerMovement : MonoBehaviour {
     }
 
     void FixedUpdate() {
+        if (isLanding){
+            return;
+        }
+
         if (gameManager.CurrentGameMode != GameMode.play) {
             transform.rotation = Quaternion.Euler(0, 90 - CurrentAngel, 0);
             return;
@@ -132,7 +138,7 @@ public class PlayerMovement : MonoBehaviour {
     }
 
     void OnCollisionEnter(Collision collision) {
-        if (gameManager.CurrentGameMode != GameMode.play) {
+        if (gameManager.CurrentGameMode != GameMode.play || isLanding) {
             return;
         }
 
@@ -156,17 +162,18 @@ public class PlayerMovement : MonoBehaviour {
         if (IsInLayerMask(collision.gameObject.layer, LayerMask.GetMask("Level End"))) {
             gameManager.LevelFinished();
         } else {
-            DoJump();
+            DoLanding();
         }
 
     }
 
     private void OnPlayMode() {
+        isLanding = false;
         nextPosition = transform.position;
     }
 
     public void SetAppropriateRotation() {
-        transform.rotation = Quaternion.Euler(0, 90 - CurrentAngel, 0);
+        transform.rotation = Quaternion.Euler(0, -CurrentAngel - 90, 0);
     }
 
     public void ForceDownJump() {
@@ -182,12 +189,22 @@ public class PlayerMovement : MonoBehaviour {
         }
     }
 
-    private void DoJump() {
+    public void DoNextJump() {
+        isLanding = false;
+        rigidBody.isKinematic = false;
+        OnPlayerJump();
+    }
+
+    private void DoLanding() {
+        isLanding = true;
+        YVelocity = 0;
+        AngularSpeed = 0;
         rigidBody.velocity = Vector3.zero;
         nextPosition = transform.position;
         TimeScale = 1;
         float forceHeight = 0;
-        if (!float.IsNegativeInfinity(StartBoostYPos)) {
+        if (!float.IsNegativeInfinity(StartBoostYPos))
+        {
             forceHeight = JumpPhysics.CalculateBoostJumpHeight(StartBoostYPos, transform.position.y);
         }
 
@@ -197,9 +214,9 @@ public class PlayerMovement : MonoBehaviour {
         AngularSpeed = JumpPhysics.LinearToAngularVelocity(velocities.x, Radius);
         ApexYPos = CurrentJumpHeight + transform.position.y;
         StartBoostYPos = float.NegativeInfinity;
-
-        OnPlayerJump();
+        OnPlayerLanding();
     }
+
 
     public static bool IsInLayerMask(int layer, LayerMask layermask) {
         return layermask == (layermask | (1 << layer));
