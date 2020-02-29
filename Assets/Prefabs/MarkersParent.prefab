@@ -43,5 +43,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a16b08aa9dcce244987118da4c2d74b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  marker: {fileID: 0}
+  markerPrefab: {fileID: 4818054160657833065, guid: aa4a694945e7dfa4ebbb12a359f89127,
+    type: 3}
   initCapacity: 50

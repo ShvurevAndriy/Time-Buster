@@ -1,33 +1,35 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class MarkerObject : MonoBehaviour {
-    private MarkersPool markersPool;
+public class MarkerObject : MonoBehaviour
+{
     private MeshRenderer meshRenderer;
+    public event Action<MarkerObject> ReleaseEvent;
 
-    private void Start() {
-        markersPool = FindObjectOfType<MarkersPool>();
-    }
-
-    public void DestroyAfterSeconds(float timeToLive) {
+    public void DestroyAfterSeconds(float timeToLive)
+    {
         StartCoroutine(ScheduleDestryTime(timeToLive));
     }
 
-    public void DestroyNow() {
-        markersPool.AddToPool(this);
+    public void DestroyNow()
+    {
+        ReleaseEvent?.Invoke(this);
     }
 
-    private IEnumerator ScheduleDestryTime(float timeToLive) {
+    private IEnumerator ScheduleDestryTime(float timeToLive)
+    {
         yield return new WaitForSeconds(timeToLive);
-        DestroyNow();
+        ReleaseEvent?.Invoke(this);
     }
 
-    public void SetColor(Color color) {
-        if (!meshRenderer) {
+    public void SetColor(Color color)
+    {
+        if (!meshRenderer)
+        {
             meshRenderer = GetComponent<MeshRenderer>();
         }
+
         meshRenderer.material.color = color;
     }
 }
